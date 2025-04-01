@@ -1,21 +1,24 @@
-import React from "react";
+// App.js
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
-import Chatbot from "./Pages/Chatbot";
+import CompanyPortal from "./Pages/CompanyPortal";
 import AdminSettings from "./Pages/AdminSettings";
 import Feedback from "./Pages/Feedback";
+import FullPageDigibot from "./Pages/FullPageDigibot";
+import { Outlet } from "react-router-dom";
 
-const App = () => {
+function App() {
   return (
     <Router>
       <Routes>
-   
-        <Route path="/chatbot" element={<Chatbot />} />
-        <Route path="/admin-settings" element={<AdminSettings />} />
-        <Route path="/feedback" element={<Feedback />} />
+        <Route path="/company-portal" element={<CompanyPortal />}>
+          <Route path="admin-settings" element={<AdminSettings />} />
+          <Route path="feedback" element={<Feedback />} />
+        </Route>
+
+        {/* Full chatbot iframe */}
+        <Route path="/FullPageDigibot" element={<FullPageDigibot />} />
       </Routes>
     </Router>
   );
-};
-
+}
 export default App;
