@@ -23,6 +23,7 @@ const FullPageDigibot = () => {
   const [version, setVersion] = useState(0);
   const isEmbedded = window.self !== window.top;
 
+
   const fetchSettings = async (companyId, userId) => {
     try {
       const res = await fetch(`http://localhost:8000/admin-settings/${companyId}`);
@@ -77,24 +78,52 @@ const FullPageDigibot = () => {
   
     const userMessage = message;
     setMessage("");
- 
+  
+    // ✅ Show user's message in the chat
     setChatHistory((prev) => [...prev, { sender: "user", text: userMessage }]);
   
+    // ⏳ Typing indicator
+    const loadingId = Date.now();
+    setChatHistory((prev) => [
+      ...prev,
+      { sender: "bot", text: "✍️ DigiBot is typing...", id: loadingId }
+    ]);
+  
     try {
+      const companyId = localStorage.getItem("companyId");
+  
       const response = await fetch("http://localhost:8000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({
+          message: userMessage,
+          company_id: companyId,
+        }),
       });
   
       const data = await response.json();
   
-      setChatHistory((prev) => [...prev, { sender: "bot", text: data.reply }]);
+      // ✅ Replace typing with actual reply
+      setChatHistory((prev) =>
+        prev.map((msg) =>
+          msg.id === loadingId
+            ? { sender: "bot", text: data.reply || "⚠️ No response received." }
+            : msg
+        )
+      );
     } catch (error) {
       console.error("Webhook Error:", error);
-      setChatHistory((prev) => [...prev, { sender: "bot", text: "⚠️ Failed to fetch response" }]);
+      setChatHistory((prev) =>
+        prev.map((msg) =>
+          msg.id === loadingId
+            ? { sender: "bot", text: "⚠️ Failed to get response." }
+            : msg
+        )
+      );
     }
   };
+  
+  
   
   
 

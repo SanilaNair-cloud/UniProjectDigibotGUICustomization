@@ -13,7 +13,9 @@ import os
 from fastapi import File, UploadFile, Form
 import shutil
 from fastapi.staticfiles import StaticFiles
-
+from models import Feedback, AdminSettings
+from schemas import FeedbackSchema, AuthResponse
+from database import Base, engine
 
 KEY_DIR = os.path.join(os.path.dirname(__file__), "keys")
 with open(os.path.join(KEY_DIR, "private.pem"), "r") as f:
@@ -22,10 +24,6 @@ with open(os.path.join(KEY_DIR, "public.pem"), "r") as f:
     PUBLIC_KEY = f.read()
 
 ALGORITHM = "RS256"
-
-
-
-
 
 app = FastAPI()
 
@@ -40,29 +38,9 @@ app.add_middleware(
 )
 
 
-class AdminSettings(Base):
-    __tablename__ = "admin_settings"
-    id = Column(Integer, primary_key=True, index=True)
-    logo = Column(String)
-    background_color = Column(String)
-    font_style = Column(String)
-    font_size = Column(String)
-    text_color = Column(String)
-    alignment = Column(String)
-    custom_audience = Column(String)
-    tone = Column(String)
-    admin_id = Column(String)
-    company_name = Column(String)
-    company_id = Column(String)  # ✅ Newly added
-
 
 Base.metadata.create_all(bind=engine)
 
-
-class AuthResponse(BaseModel):
-    user_id: str
-    user_type: str
-    chatbot_url: str
 
 
 def get_db():
@@ -175,7 +153,7 @@ def authenticate_user(auth: str = Query(...)):
 @app.get("/")
 def root_redirect():
     user_id = "usertwbm123@example.com"
-    user_type = "user"
+    user_type = "admin"
     company_id = "twmba123"
     company_name = "Toowoomba"
     token = create_jwt_token(user_id, user_type, company_id, company_name)
@@ -189,17 +167,56 @@ def get_admin_settings(company_id: str, db: Session = Depends(get_db)):
     return settings
 
 @app.post("/chat")
-async def relay_to_webhook(request: Request):
+async def relay_to_webhook(request: Request, db: Session = Depends(get_db)):
     body = await request.json()
 
+    company_id = body.get("company_id")
+    if not company_id:
+        raise HTTPException(status_code=400, detail="Missing company_id")
+
+    
+    settings = db.query(AdminSettings).filter(AdminSettings.company_id == company_id).first()
+    audience = settings.custom_audience if settings else "N/A"
+    tone = settings.tone if settings else "N/A"
+    body["tone"] = tone
+    body["custom_audience"] = audience
+
+    """
     async with httpx.AsyncClient() as client:
-       
-        response = await client.post("http://localhost:4000/webhook", json=body)
         
-        # ✅ Forward to Webhook.site (logging only)
-        await client.post(
-            "https://webhook.site/4c443290-9e27-4b4a-b719-cb5e5f1aded5",  
+        response = await client.post(
+            "https://automate.digimark.com.au/webhook/9fa58f14-8ac3-42f4-a095-c6db67b61558",
             json=body
         )
+    print("👉 Final response to frontend:", response.json())
 
     return response.json()
+    """
+    #  Temporarily mocking the reply while n8n webhook is not ready
+    mock_reply = f"""⚠️ This is a test response. The production webhook is not yet active.
+
+    🎯 Audience: {settings.custom_audience or "N/A"}  
+    🗣️ Tone: {settings.tone or "N/A"}
+
+    Once the real webhook is ready, this will return intelligent AI generated responses.
+    """
+    return { "reply": mock_reply }
+
+    
+
+
+   
+
+
+@app.post("/feedback")
+def save_feedback(feedback: FeedbackSchema, db: Session = Depends(get_db)):
+    new_feedback = Feedback(
+        rating=feedback.rating,
+        text=feedback.text,
+        company_id=feedback.company_id,
+        created_at=datetime.utcnow().isoformat()
+    )
+    db.add(new_feedback)
+    db.commit()
+    print("Feedback saved:", feedback)
+    return {"message": "Feedback saved successfully!"}

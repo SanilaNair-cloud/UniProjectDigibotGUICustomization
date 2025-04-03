@@ -18,15 +18,37 @@ const Feedback = () => {
   const [text, setText] = useState("");
   const [feedbackGiven, setFeedbackGiven] = useState(false);
 
-  const handleSubmit = () => {
-    console.log("✅ Feedback submitted:", { rating, text });
-    setFeedbackGiven(true);
-    
-
-    setTimeout(() => {
-      window.parent.postMessage({ type: "NAVIGATE", route: "" }, "*");
-    }, 1500);
+  const handleSubmit = async () => {
+    const payload = {
+      rating,
+      text,
+      company_id: "twmba123", // You can make this dynamic
+    };
+  
+    try {
+      const response = await fetch("http://localhost:8000/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (response.ok) {
+        console.log("✅ Feedback submitted:", payload);
+        setFeedbackGiven(true);
+  
+        setTimeout(() => {
+          window.parent.postMessage({ type: "NAVIGATE", route: "" }, "*");
+        }, 1500);
+      } else {
+        console.error("❌ Failed to submit feedback:", await response.text());
+      }
+    } catch (error) {
+      console.error("❌ Error submitting feedback:", error);
+    }
   };
+  
 
   return (
     <Box
@@ -107,8 +129,6 @@ const Feedback = () => {
           )}
         </Paper>
       </Fade>
-
-     
     </Box>
   );
 };

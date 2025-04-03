@@ -1,9 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Typography, Box, Paper, Container } from "@mui/material";
 import { Outlet } from "react-router-dom";
+import InternalStaffUI from "./InternalStaffUI";
+
 
 
 const CompanyPortal = () => {
+  const [showInternalChat, setShowInternalChat] = useState(false);
  
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -89,9 +92,23 @@ const CompanyPortal = () => {
             <Typography variant="body1" fontSize="1.2rem" color="text.secondary">
               Simulating the company’s portal with secure SSO login.
             </Typography>
-          </Paper>
+            <Box mt={3}>
+                <button
+                  style={{ background: "none", border: "none", color: '#1976d2', fontWeight: 'bold', cursor: "pointer" }}
+                  onClick={() => setShowInternalChat(true)}
+                >
+                  🔒 Go to Internal Staff Chat
+                </button>
+              </Box>
+
+            </Paper>
+            {showInternalChat && (
+              <Box mt={4}>
+                <InternalStaffUI />
+              </Box>
+            )}
   
-         
+          
           <Outlet />
         </Container>
       </Box>
