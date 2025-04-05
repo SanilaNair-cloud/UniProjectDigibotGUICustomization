@@ -15,7 +15,13 @@ import shutil
 from fastapi.staticfiles import StaticFiles
 from models import Feedback, AdminSettings
 from schemas import FeedbackSchema, AuthResponse
+from textblob import TextBlob
 from database import Base, engine
+from fastapi.security import OAuth2PasswordBearer
+from fastapi import Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+security = HTTPBearer()
 
 KEY_DIR = os.path.join(os.path.dirname(__file__), "keys")
 with open(os.path.join(KEY_DIR, "private.pem"), "r") as f:
@@ -68,7 +74,25 @@ def verify_jwt_token(token: str):
         raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=403, detail="Invalid token")
+    
+""" Data solution Part"""
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="superadmin-auth")
 
+def verify_superadmin_token(token: str = Depends(oauth2_scheme)):
+    payload = verify_jwt_token(token)
+    #print("🔑 Payload:", payload);
+    if payload["user_type"] != "superadmin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return payload
+
+def analyze_sentiment(text):
+    polarity = TextBlob(text).sentiment.polarity
+    if polarity > 0.2:
+        return "Positive", polarity
+    elif polarity < -0.2:
+        return "Negative", polarity
+    else:
+        return "Neutral", polarity
 
 
 @app.post("/admin-settings/")
@@ -210,13 +234,56 @@ async def relay_to_webhook(request: Request, db: Session = Depends(get_db)):
 
 @app.post("/feedback")
 def save_feedback(feedback: FeedbackSchema, db: Session = Depends(get_db)):
+    sentiment_label, sentiment_score = analyze_sentiment(feedback.text)
+
     new_feedback = Feedback(
         rating=feedback.rating,
         text=feedback.text,
         company_id=feedback.company_id,
-        created_at=datetime.utcnow().isoformat()
+        created_at=datetime.utcnow().isoformat(),
+        sentiment=sentiment_label,           # ✅ Save sentiment
+        sentiment_score=sentiment_score      # ✅ Save score
     )
+
     db.add(new_feedback)
     db.commit()
-    print("Feedback saved:", feedback)
-    return {"message": "Feedback saved successfully!"}
+    print("✅ Feedback saved with sentiment:", feedback)
+    return {"message": "Feedback and sentiment saved successfully!"}
+
+"""Data science solution part"""
+
+@app.post("/superadmin-auth")
+def superadmin_auth(email: str = Form(...)):
+    if email == "digimark@admin.com":
+        token = create_jwt_token(email, "superadmin", "digimark", "DigiMark")
+        return {"auth": token}
+    raise HTTPException(status_code=403, detail="Unauthorized")
+
+
+    
+@app.get("/feedback-all")
+def get_all_feedback(
+    db: Session = Depends(get_db),
+    credentials: HTTPAuthorizationCredentials = Security(security)
+):
+    token = credentials.credentials
+    payload = verify_jwt_token(token)
+
+    if payload["user_type"] != "superadmin":
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    feedback = db.query(Feedback).all()
+    return [
+        {
+            "id": f.id,
+            "rating": f.rating,
+            "text": f.text,
+            "created_at": f.created_at,
+            "company_id": f.company_id,
+            "sentiment": f.sentiment,
+            "sentiment_score": f.sentiment_score,
+        }
+        for f in feedback
+    ]
+
+

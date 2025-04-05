@@ -1,5 +1,5 @@
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Float
 from database import Base
 
 class Feedback(Base):
@@ -9,6 +9,8 @@ class Feedback(Base):
     text = Column(String)
     created_at = Column(String)
     company_id = Column(String)
+    sentiment = Column(String)  
+    sentiment_score = Column(Float)  
 
 class AdminSettings(Base):
     __tablename__ = "admin_settings"

@@ -7,7 +7,8 @@ class FeedbackSchema(BaseModel):
     company_id: str
 
     class Config:
-        from_attributes = True  # For Pydantic v2
+        from_attributes = True  
+
 
 class AuthResponse(BaseModel):
     user_id: str
