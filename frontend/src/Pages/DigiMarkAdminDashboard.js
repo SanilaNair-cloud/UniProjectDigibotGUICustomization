@@ -18,6 +18,7 @@ LineElement, Tooltip, Legend, TimeScale
 );
 
 const DigiMarkAdminDashboard = () => {
+const [companyList, setCompanyList] = useState([]);
 const [feedbackData, setFeedbackData] = useState([]);
 const [selectedCompany, setSelectedCompany] = useState("all");
 const [searchTerm, setSearchTerm] = useState("");
@@ -27,28 +28,53 @@ const [viewMode, setViewMode] = useState("avg");
 
 
 useEffect(() => {
-const token = localStorage.getItem("digimark_token");
-const user = JSON.parse(sessionStorage.getItem("user"));
+  const token = localStorage.getItem("digimark_token");
+  const user = JSON.parse(sessionStorage.getItem("user"));
 
-if (!token || user?.user_type !== "superadmin") {
-  console.warn("⚠️ Not authorized or token missing");
-  return;
-}
+  if (!token || user?.user_type !== "superadmin") {
+    console.warn("⚠️ Not authorized or token missing");
+    return;
+  }
 
-fetch("http://localhost:8000/feedback-all", {
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-})
-  .then((res) => res.ok ? res.json() : Promise.reject("Failed to fetch feedback"))
-  .then(setFeedbackData)
-  .catch(console.error);
-  }, []);
 
-  const uniqueCompanies = [...new Set(feedbackData.map(fb => fb.company_id))];
+  fetch("http://localhost:8000/feedback-all", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => res.ok ? res.json() : Promise.reject("Failed to fetch feedback"))
+    .then((data) => {
+      
+      const normalized = data.map(fb => ({
+        ...fb,
+        company_id: fb.company_id?.toLowerCase().trim()
+      }));
+      setFeedbackData(normalized);
+    })
+    .catch(console.error);
+
+  // Fetch company list
+  fetch("http://localhost:8000/admin-settings-all")
+    .then((res) => res.ok ? res.json() : Promise.reject("Failed to fetch companies"))
+    .then((data) => {
+      const formattedCompanies = data.map((item) => ({
+        label: item.company_name,
+        value: item.company_id?.toLowerCase().trim() // ✅ normalize company_id
+      }));
+
+      setCompanyList(formattedCompanies);
+    })
+    .catch(console.error);
+}, []);
+
+
+
 
   const filteredFeedback = feedbackData.filter(fb => {
-  const companyMatch = selectedCompany === "all" || fb.company_id === selectedCompany;
+  const companyMatch =
+    selectedCompany === "all" ||
+    fb.company_id?.toLowerCase().trim() === selectedCompany.toLowerCase().trim();
+  
   const commentMatch = fb.text?.toLowerCase().includes(searchTerm.toLowerCase());
   const dateMatch = (!dateRange.from || new Date(fb.created_at) >= new Date(dateRange.from)) &&
   (!dateRange.to || new Date(fb.created_at) <= new Date(dateRange.to));
@@ -103,7 +129,7 @@ fetch("http://localhost:8000/feedback-all", {
       ],
     };
   } else {
-    // viewMode === "count"
+    
     const ratingCounts = {};
   
     filteredFeedback.forEach((fb) => {
@@ -172,15 +198,17 @@ fetch("http://localhost:8000/feedback-all", {
       <Grid container spacing={2} mb={2}>
     <Grid item xs={12} sm={4}>
       <FormControl fullWidth>
-        <InputLabel>Select Company</InputLabel>
+      <InputLabel>Select Company</InputLabel>
         <Select
           value={selectedCompany}
           label="Select Company"
           onChange={(e) => setSelectedCompany(e.target.value)}
         >
-          <MenuItem value="all">All</MenuItem>
-          {uniqueCompanies.map((c) => (
-            <MenuItem key={c} value={c}>{c}</MenuItem>
+          <MenuItem value="all">All Companies</MenuItem>
+          {companyList.map((c) => (
+            <MenuItem key={c.value} value={c.value}>
+              {c.label}
+            </MenuItem>
           ))}
         </Select>
       </FormControl>
