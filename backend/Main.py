@@ -176,10 +176,10 @@ def authenticate_user(auth: str = Query(...)):
 
 @app.get("/")
 def root_redirect():
-    user_id = "usertwbm123@example.com"
+    user_id = "brisbane23@example.com"
     user_type = "admin"
-    company_id = "twmba123"
-    company_name = "Toowoomba"
+    company_id = "brisbane123"
+    company_name = "CompanyBrisbane"
     token = create_jwt_token(user_id, user_type, company_id, company_name)
     return RedirectResponse(url=f"http://localhost:3000/company-portal?auth={token}")
 
