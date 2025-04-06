@@ -22,13 +22,20 @@
       iframe.id = "digibot-iframe";
       iframe.src = data.chatbot_url;
    
-      iframe.style.height = "auto";
-      iframe.style.minHeight = "740px"; 
-      
-    
 
-      iframe.style.width = "100%";  
-      iframe.style.maxWidth = "600px"; 
+
+     // iframe.style.height = "auto";
+    //iframe.style.minHeight = "740px";    
+    
+    //  iframe.style.width = "100%";  
+     // iframe.style.maxWidth = "600px"; 
+
+
+     // Responsive Screen
+      iframe.style.width = "95vw"; 
+      iframe.style.maxWidth = "600px";
+      iframe.style.height = "80vh"; 
+      iframe.style.maxHeight = "90vh";
      
      
      
