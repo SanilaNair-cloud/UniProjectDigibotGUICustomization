@@ -173,9 +173,11 @@ const FullPageDigibot = () => {
           backgroundColor: theme.background_color || "#ffffff",
         }}
       >
+        
         <Stack direction="row" justifyContent="space-between" alignItems="center" p={2}>
           <Stack direction="row" spacing={2} alignItems="center">
-            <Avatar src={logoUrl || "/logo192.png"} sx={{ width: 40, height: 40, borderRadius: 2 }} />
+            {/*/logo192.png*/}
+            <Avatar src={logoUrl || "/Images/speech-bubble.png"} sx={{ width: 40, height: 40, borderRadius: 2 }} />
             <Box>
               <Typography variant="h6" fontSize={18} m={0}>DigiBot</Typography>
               <Typography variant="caption" color="text.secondary">{companyName}</Typography>

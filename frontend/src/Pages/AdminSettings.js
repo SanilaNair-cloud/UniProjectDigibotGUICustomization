@@ -10,17 +10,39 @@ import {
   MenuItem,
   Snackbar,
   Alert,
+  //Logo Cropping
+  Dialog,
+  DialogContent,
+  DialogActions,
+  //Logo Cropping
 } from "@mui/material";
 import { Settings, CloudUpload } from "@mui/icons-material";
 import axios from "axios";
 
+// Added for cropping
+import Cropper from "react-easy-crop";
+import getCroppedImg from "../Components/cropImageHelper";
+
+
+
 const AdminSettings = () => {
   const [logo, setLogo] = useState(null);
+  const [imageSrc, setImageSrc] = useState(null); // For cropping preview
+  const [cropDialogOpen, setCropDialogOpen] = useState(false); //  Controls crop dialog
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null); //  Stores cropped area
+  const [crop, setCrop] = useState({ x: 0, y: 0 }); //  Added missing crop state
+  const [zoom, setZoom] = useState(1); // Optional zoom control
+  const [previewUrl, setPreviewUrl] = useState(null); //  Cropped preview
+  const [imageType, setImageType] = useState("image/png"); // Image Type
+
   const [bgColor, setBgColor] = useState("#ffffff");
   const [typography, setTypography] = useState("Arial");
-  const [fontSize, setFontSize] = useState("16px");
+  const [fontSize, setFontSize] = useState("14px"); //Default Font
   const [textColor, setTextColor] = useState("#000000");
   const [alignment, setAlignment] = useState("Left");
+
+  const [fontWeight, setFontWeight] = useState("400"); // default normal
+
   const [customAudience, setCustomAudience] = useState("");
   const [tone, setTone] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -30,9 +52,40 @@ const AdminSettings = () => {
   const companyName = localStorage.getItem("companyName") || "";
   const adminId = localStorage.getItem("userId") || "";
 
-  const handleLogoUpload = (event) => {
-    setLogo(event.target.files[0]);
-  };
+//  Called when crop is done
+const onCropComplete = (_, croppedPixels) => {
+  setCroppedAreaPixels(croppedPixels);
+};
+
+//  Converts image to base64 and opens cropper dialog
+const handleLogoUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    //(image/png or image/jpeg)
+    setImageType(file.type);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageSrc(reader.result);
+      setCropDialogOpen(true);
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+// Finalizes cropping and sets logo
+const handleCropSave = async () => {
+  const croppedFile = await getCroppedImg(imageSrc, croppedAreaPixels, imageType);
+  setLogo(croppedFile);
+  setPreviewUrl(URL.createObjectURL(croppedFile));
+  setCropDialogOpen(false);
+};
+
+
+ //Defined new for cropping
+ // const handleLogoUpload = (event) => {
+ //   setLogo(event.target.files[0]);
+ // };
 
   const handleSaveSettings = async () => {
     const formData = new FormData();
@@ -47,6 +100,7 @@ const AdminSettings = () => {
     formData.append("admin_id", adminId);
     formData.append("company_name", companyName);
     formData.append("company_id", companyId);
+    formData.append("font_weight", fontWeight); //Font weight
 
     try {
       await axios.post("http://localhost:8000/admin-settings/", formData, {
@@ -106,6 +160,22 @@ const AdminSettings = () => {
               onChange={handleLogoUpload}
               accept="image/*"
             />
+         {/* Logo Cropping */}
+          {previewUrl && (
+            <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
+              <img
+                src={previewUrl}
+                alt="Logo Preview"
+                style={{
+                  width: 100,
+                  height: 100,
+                  borderRadius: 8,
+                  border: "1px solid #ccc",
+                }}
+              />
+            </Box>
+          )}
+          {/* end of --------------Logo Cropping */}
             <Button
               variant="contained"
               color="primary"
@@ -122,7 +192,28 @@ const AdminSettings = () => {
             </Typography>
           )}
         </Box>
-
+         {/*Logo Crop Dialog */}
+        <Dialog open={cropDialogOpen} onClose={() => setCropDialogOpen(false)} fullWidth maxWidth="sm">
+          <DialogContent sx={{ height: 400, position: "relative" }}>
+            {imageSrc && (
+              <Cropper
+                image={imageSrc}
+                crop={crop} 
+                onCropChange={setCrop} 
+                zoom={zoom}
+                onZoomChange={setZoom} 
+                aspect={1}
+                onCropComplete={onCropComplete}
+              />
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setCropDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleCropSave} variant="contained" color="primary">
+              Crop & Save
+            </Button>
+          </DialogActions>
+        </Dialog>
       
         <Box sx={{ bgcolor: "#fff3e0", p: 2.5, borderRadius: 2, mb: 2 }}>
           <Typography variant="h6">Select Background Color</Typography>
@@ -173,6 +264,34 @@ const AdminSettings = () => {
               </MenuItem>
             ))}
           </TextField>
+
+          {/*Font Weight*/}
+         <TextField
+          fullWidth
+          select
+          label="Font Weight"
+          variant="outlined"
+          margin="normal"
+          value={fontWeight}
+          onChange={(e) => setFontWeight(e.target.value)}
+        >
+          {[
+            { label: "Thin", value: "100" },
+            { label: "Extra Light", value: "200" },
+            { label: "Light", value: "300" },
+            { label: "Normal", value: "400" },
+            { label: "Medium", value: "500" },
+            { label: "Semi Bold", value: "600" },
+            { label: "Bold", value: "700" },
+            { label: "Extra Bold", value: "800" },
+            { label: "Black", value: "900" },
+          ].map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </TextField>
+
 
           <TextField
             fullWidth
