@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { keyframes } from '@emotion/react';
 import {
   Box,
   Paper,
@@ -22,7 +23,16 @@ const FullPageDigibot = () => {
   const [theme, setTheme] = useState({});
   const [version, setVersion] = useState(0);
   const isEmbedded = window.self !== window.top;
-
+  const slideUp = keyframes`
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+`;
 
   const fetchSettings = async (companyId, userId) => {
     try {
@@ -30,6 +40,8 @@ const FullPageDigibot = () => {
       const settings = await res.json();
       setLogoUrl(`http://localhost:8000/uploads/${settings.logo}`);
       setTheme(settings);
+      console.log("✅ Final theme object:", settings);
+
       setVersion((prev) => prev + 1);
       const name = userId.split("@")[0];
       setGreeting(`Hi ${name}, how can I help?`);
@@ -138,6 +150,7 @@ const FullPageDigibot = () => {
   if (!userRole || !userId) {
     return <Box p={2} textAlign="center">Loading chatbot...</Box>;
   }
+  console.log("🖼️ Outer background color being used:", theme.background_color);
 
   return (
     <Box
@@ -154,12 +167,7 @@ const FullPageDigibot = () => {
         boxShadow: 6,
         zIndex: 1000,
         overflow: "hidden",
-        backgroundColor: theme.background_color || "#f5f5f5",
-        animation: "slide-up 0.4s ease-in-out",
-        "@keyframes slide-up": {
-          from: { transform: "translateY(100%)", opacity: 0 },
-          to: { transform: "translateY(0)", opacity: 1 },
-        },
+        animation: `${slideUp} 0.4s ease-in-out`, 
       }}
     >
       <Paper
@@ -170,11 +178,14 @@ const FullPageDigibot = () => {
           flexDirection: "column",
           borderRadius: 3,
           overflow: "hidden",
-          backgroundColor: theme.background_color || "#ffffff",
+          backgroundColor: "transparent",
         }}
       >
         
-        <Stack direction="row" justifyContent="space-between" alignItems="center" p={2}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" p={2} sx={{
+            backgroundColor: theme.background_color || "#ffffff",
+            transition: "background-color 0.3s ease",
+          }}>
           <Stack direction="row" spacing={2} alignItems="center">
             {/*/logo192.png*/}
             <Avatar src={logoUrl || "/Images/speech-bubble.png"} sx={{ width: 40, height: 40, borderRadius: 2 }} />
@@ -214,7 +225,10 @@ const FullPageDigibot = () => {
           ))}
         </Box>
 
-        <Stack direction="row" spacing={1} px={2} pb={2}>
+        <Stack direction="row" spacing={1} px={2} pb={2} sx={{
+            backgroundColor: theme.background_color || "#ffffff",
+            transition: "background-color 0.3s ease",
+          }}>
           <TextField
             value={message}
             onChange={(e) => setMessage(e.target.value)}
