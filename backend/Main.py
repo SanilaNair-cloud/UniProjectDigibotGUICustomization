@@ -176,16 +176,19 @@ def authenticate_user(auth: str = Query(...)):
 
 @app.get("/")
 def root_redirect():
-    user_id = "brisbane23@example.com"
+    user_id = "san23@example.com"
     user_type = "admin"
-    company_id = "brisbane123"
-    company_name = "CompanyBrisbane"
+    company_id = "san123"
+    company_name = "Sanfran123"
     token = create_jwt_token(user_id, user_type, company_id, company_name)
     return RedirectResponse(url=f"http://localhost:3000/company-portal?auth={token}")
 
 @app.get("/admin-settings/{company_id}")
 def get_admin_settings(company_id: str, db: Session = Depends(get_db)):
     settings = db.query(AdminSettings).filter(AdminSettings.company_id == company_id).first()
+    print("REturned logo:", settings.logo)
+    print("🧾 Returned background_color:", settings.background_color)
+
     if not settings:
         raise HTTPException(status_code=404, detail="Settings not found")
     return settings
@@ -257,7 +260,15 @@ def superadmin_auth(email: str = Form(...)):
     if email == "digimark@admin.com":
         token = create_jwt_token(email, "superadmin", "digimark", "DigiMark")
         return {"auth": token}
-    raise HTTPException(status_code=403, detail="Unauthorized")
+    raise HTTPException(status_code=403, detail="Only DigiMark Super Admin is allowed")
+
+
+@app.get("/admin-settings-all")
+def get_all_companies(db: Session = Depends(get_db)):
+    results = db.query(AdminSettings.company_id, AdminSettings.company_name).distinct().all()
+    print("📦 All companies fetched:", results)
+    return [{"company_id": cid, "company_name": cname} for cid, cname in results]
+
 
 
     
