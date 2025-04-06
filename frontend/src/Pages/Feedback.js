@@ -22,8 +22,10 @@ const Feedback = () => {
     const payload = {
       rating,
       text,
-      company_id: "twmba123", // You can make this dynamic
+      company_id: localStorage.getItem("companyId"), // ✅ Make it dynamic
     };
+    console.log("✅ Submitting feedback for:", payload);
+
   
     try {
       const response = await fetch("http://localhost:8000/feedback", {
