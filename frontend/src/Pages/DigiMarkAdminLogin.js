@@ -9,9 +9,16 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-const DigiMarkAdminLogin = () => {
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+  const DigiMarkAdminLogin = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [touched, setTouched] = useState(false);
+ 
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +29,8 @@ const DigiMarkAdminLogin = () => {
       navigate("/digimark-dashboard");
     }
   }, [navigate]);
+
+ 
 
   const handleLogin = async () => {
     try {
@@ -36,7 +45,7 @@ const DigiMarkAdminLogin = () => {
         const token = data.auth;
         const decoded = JSON.parse(atob(token.split(".")[1]));
   
-        // ✅ First store both
+       
         localStorage.setItem("digimark_token", token);
         sessionStorage.setItem("user", JSON.stringify(decoded));
   
@@ -64,17 +73,34 @@ const DigiMarkAdminLogin = () => {
   const isLoggedIn = !!sessionStorage.getItem("user");
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      minHeight="100vh"
-      bgcolor="#f4f6f8"
-    >
-      <Paper elevation={6} sx={{ p: 4, borderRadius: 2, maxWidth: 400 }}>
-        <Typography variant="h5" mb={2} textAlign="center">
+        <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+        sx={{
+          background: 'linear-gradient(135deg, #e0f7fa, #ffffff)',
+        }}
+      >
+      <Paper
+          elevation={6}
+          sx={{
+            p: 4,
+            borderRadius: 3,
+            maxWidth: 400,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          }}
+        >
+
+        <Typography
+          variant="h5"
+          mb={2}
+          textAlign="center"
+          sx={{ fontFamily: 'Poppins, sans-serif' }}
+        >
           DigiMark Admin Login
         </Typography>
+
         <Stack spacing={2}>
           {isLoggedIn ? (
             <>
@@ -95,8 +121,18 @@ const DigiMarkAdminLogin = () => {
               <TextField
                 label="Email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (!touched) setTouched(true);
+                }}
+                onBlur={() => setTouched(true)}
                 fullWidth
+                error={touched && !emailRegex.test(email)}
+                helperText={
+                  touched && !emailRegex.test(email)
+                    ? "Please enter a valid email address"
+                    : ""
+                }
               />
               {error && (
                 <Typography variant="body2" color="error">
@@ -107,15 +143,25 @@ const DigiMarkAdminLogin = () => {
                 variant="contained"
                 fullWidth
                 onClick={handleLogin}
-                disabled={!email}
+                disabled={!emailRegex.test(email)}
+                sx={{
+                  mt: 2,
+                  backgroundColor: '#1976d2',
+                  ':hover': { backgroundColor: '#115293' },
+                  transition: 'background-color 0.3s ease',
+                }}
               >
                 Login
               </Button>
+
             </>
           )}
         </Stack>
       </Paper>
+          
     </Box>
+     
+    
   );
 };
 
