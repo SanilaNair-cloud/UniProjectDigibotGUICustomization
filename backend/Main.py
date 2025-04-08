@@ -33,7 +33,12 @@ ALGORITHM = "RS256"
 
 app = FastAPI()
 
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOADS_DIR = os.path.join(BASE_DIR, "uploads")
+
+
+
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
@@ -176,10 +181,10 @@ def authenticate_user(auth: str = Query(...)):
 
 @app.get("/")
 def root_redirect():
-    user_id = "san23@example.com"
+    user_id = "amrit12@example.com"
     user_type = "admin"
-    company_id = "san123"
-    company_name = "Sanfran123"
+    company_id = "amr123"
+    company_name = "AMT123"
     token = create_jwt_token(user_id, user_type, company_id, company_name)
     return RedirectResponse(url=f"http://localhost:3000/company-portal?auth={token}")
 

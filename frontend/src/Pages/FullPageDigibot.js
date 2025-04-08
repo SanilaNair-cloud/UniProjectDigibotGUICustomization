@@ -10,7 +10,7 @@ import {
   Avatar,
 } from "@mui/material";
 import { Settings, Close, Send } from "@mui/icons-material";
-
+ 
 const FullPageDigibot = () => {
   const containerRef = useRef(null);
   const [message, setMessage] = useState("");
@@ -33,7 +33,7 @@ const FullPageDigibot = () => {
     opacity: 1;
   }
 `;
-
+ 
   const fetchSettings = async (companyId, userId) => {
     try {
       const res = await fetch(`http://localhost:8000/admin-settings/${companyId}`);
@@ -41,7 +41,7 @@ const FullPageDigibot = () => {
       setLogoUrl(`http://localhost:8000/uploads/${settings.logo}`);
       setTheme(settings);
       console.log("✅ Final theme object:", settings);
-
+ 
       setVersion((prev) => prev + 1);
       const name = userId.split("@")[0];
       setGreeting(`Hi ${name}, how can I help?`);
@@ -49,7 +49,7 @@ const FullPageDigibot = () => {
       console.error("Error loading admin settings:", err);
     }
   };
-
+ 
   useEffect(() => {
     const handleUserInfo = (event) => {
       if (event.data?.type === "USER_INFO") {
@@ -58,14 +58,14 @@ const FullPageDigibot = () => {
         setUserRole(userRole);
         setCompanyName(companyName);
         fetchSettings(companyId, userId);
-
+ 
         localStorage.setItem("companyId", companyId);
         localStorage.setItem("companyName", companyName);
         localStorage.setItem("userId", userId);
         localStorage.setItem("userRole", userRole);
       }
     };
-
+ 
     const handleRefresh = (event) => {
       if (event.data?.type === "REFRESH_SETTINGS") {
         const companyId = localStorage.getItem("companyId");
@@ -76,7 +76,7 @@ const FullPageDigibot = () => {
         console.log("🔁 REFRESH received");
       }
     };
-
+ 
     window.addEventListener("message", handleUserInfo);
     window.addEventListener("message", handleRefresh);
     return () => {
@@ -84,7 +84,7 @@ const FullPageDigibot = () => {
       window.removeEventListener("message", handleRefresh);
     };
   }, [isEmbedded]);
-
+ 
   const handleSend = async () => {
     if (!message.trim()) return;
   
@@ -138,20 +138,20 @@ const FullPageDigibot = () => {
   
   
   
-
+ 
   const handleGoToAdmin = () => {
     window.parent.postMessage({ type: "NAVIGATE", route: "admin-settings" }, "*");
   };
-
+ 
   const handleClose = () => {
     window.parent.postMessage({ type: "NAVIGATE", route: "feedback" }, "*");
   };
-
+ 
   if (!userRole || !userId) {
     return <Box p={2} textAlign="center">Loading chatbot...</Box>;
   }
   console.log("🖼️ Outer background color being used:", theme.background_color);
-
+ 
   return (
     <Box
       key={version}
@@ -167,7 +167,7 @@ const FullPageDigibot = () => {
         boxShadow: 6,
         zIndex: 1000,
         overflow: "hidden",
-        animation: `${slideUp} 0.4s ease-in-out`, 
+        animation: `${slideUp} 0.4s ease-in-out`,
       }}
     >
       <Paper
@@ -205,7 +205,7 @@ const FullPageDigibot = () => {
             </IconButton>
           </Box>
         </Stack>
-
+ 
         <Box flexGrow={1} overflow="auto" mb={2} p={1} bgcolor="#f9f9f9" borderRadius={2}>
           {[{ sender: "bot", text: greeting }, ...chatHistory].map((msg, idx) => (
             <Box key={idx} textAlign={msg.sender === "user" ? "right" : "left"} mb={1}>
@@ -224,7 +224,7 @@ const FullPageDigibot = () => {
             </Box>
           ))}
         </Box>
-
+ 
         <Stack direction="row" spacing={1} px={2} pb={2} sx={{
             backgroundColor: theme.background_color || "#ffffff",
             transition: "background-color 0.3s ease",
@@ -245,5 +245,5 @@ const FullPageDigibot = () => {
     </Box>
   );
 };
-
+ 
 export default FullPageDigibot;

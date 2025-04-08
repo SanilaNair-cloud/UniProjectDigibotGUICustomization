@@ -8,6 +8,7 @@ import {
   Stack,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
 const DigiMarkAdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -29,23 +30,19 @@ const DigiMarkAdminLogin = () => {
         method: "POST",
         body: new URLSearchParams({ email }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
         const token = data.auth;
         const decoded = JSON.parse(atob(token.split(".")[1]));
-  
-        // ✅ First store both
+
         localStorage.setItem("digimark_token", token);
         sessionStorage.setItem("user", JSON.stringify(decoded));
-  
-        console.log("✅ Token stored:", localStorage.getItem("digimark_token"));
-  
-        // ✅ Wait for confirmation before navigating
+
         setTimeout(() => {
           navigate("/digimark-dashboard");
-        }, 300); 
+        }, 300);
       } else {
         setError(data.detail || "Login failed");
       }
@@ -53,10 +50,10 @@ const DigiMarkAdminLogin = () => {
       setError("Login error. Please try again.");
     }
   };
-  
+
   const handleLogout = () => {
     sessionStorage.removeItem("user");
-    localStorage.removeItem("digimark_token"); // ✅ also remove token
+    localStorage.removeItem("digimark_token");
     setEmail("");
     setError("");
   };
@@ -69,16 +66,37 @@ const DigiMarkAdminLogin = () => {
       justifyContent="center"
       alignItems="center"
       minHeight="100vh"
-      bgcolor="#f4f6f8"
+      sx={{
+        background: "linear-gradient(135deg,rgb(255, 255, 255) 0%,rgb(255, 255, 255) 100%)",
+        p: 2,
+      }}
     >
-      <Paper elevation={6} sx={{ p: 4, borderRadius: 2, maxWidth: 400 }}>
-        <Typography variant="h5" mb={2} textAlign="center">
+      <Paper
+        elevation={10}
+        sx={{
+          p: 5,
+          borderRadius: 3,
+          width: "100%",
+          maxWidth: 400,
+          textAlign: "center",
+          background: "rgba(255, 255, 255, 0.85)",
+          backdropFilter: "blur(8px)",
+          animation: "fadeIn 0.8s ease",
+          // Defining the keyframes for the fade-in animation
+          "@keyframes fadeIn": {
+            from: { opacity: 0, transform: "translateY(20px)" },
+            to: { opacity: 1, transform: "translateY(0)" },
+          },
+        }}
+      >
+        <AdminPanelSettingsIcon sx={{ fontSize: 50, color: "#1976d2", mb: 2 }} />
+        <Typography variant="h5" fontWeight={600} gutterBottom>
           DigiMark Admin Login
         </Typography>
-        <Stack spacing={2}>
+        <Stack spacing={2} mt={2}>
           {isLoggedIn ? (
             <>
-              <Typography variant="body1" textAlign="center">
+              <Typography variant="body1" color="text.secondary">
                 You're already logged in.
               </Typography>
               <Button
@@ -86,6 +104,7 @@ const DigiMarkAdminLogin = () => {
                 color="secondary"
                 fullWidth
                 onClick={handleLogout}
+                sx={{ borderRadius: 2, textTransform: "none" }}
               >
                 Logout
               </Button>
@@ -94,9 +113,21 @@ const DigiMarkAdminLogin = () => {
             <>
               <TextField
                 label="Email"
+                variant="outlined"
+                type="email"
+                placeholder="Enter your admin email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 fullWidth
+                sx={{
+                  borderRadius: 2,
+                  "& .MuiOutlinedInput-root": {
+                    transition: "box-shadow 0.3s ease",
+                    "&.Mui-focused": {
+                      boxShadow: "0 0 0 3px rgba(25, 118, 210, 0.3)",
+                    },
+                  },
+                }}
               />
               {error && (
                 <Typography variant="body2" color="error">
@@ -105,9 +136,21 @@ const DigiMarkAdminLogin = () => {
               )}
               <Button
                 variant="contained"
-                fullWidth
+                size="large"
                 onClick={handleLogin}
                 disabled={!email}
+                fullWidth
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  py: 1.5,
+                  transition: "background-color 0.3s ease, transform 0.2s ease",
+                  backgroundColor: email ? "#1976d2" : "#ccc",
+                  "&:hover": {
+                    backgroundColor: email ? "#1565c0" : "#ccc",
+                    transform: email ? "translateY(-2px)" : "none",
+                  },
+                }}
               >
                 Login
               </Button>
