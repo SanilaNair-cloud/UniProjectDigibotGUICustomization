@@ -34,6 +34,7 @@ const AdminSettings = () => {
   const [zoom, setZoom] = useState(1); // Optional zoom control
   const [previewUrl, setPreviewUrl] = useState(null); //  Cropped preview
   const [imageType, setImageType] = useState("image/png"); // Image Type
+  const [uploadError, setUploadError] = useState(""); // Error state for upload
 
   const [bgColor, setBgColor] = useState("#ffffff");
   const [typography, setTypography] = useState("Arial");
@@ -61,6 +62,13 @@ const onCropComplete = (_, croppedPixels) => {
 const handleLogoUpload = (event) => {
   const file = event.target.files[0];
   if (file) {
+      // Validation for PNG or JPEG
+    if (file.type !== "image/png" && file.type !== "image/jpeg") {
+      setUploadError("Only PNG or JPEG files are allowed.");
+      return;
+    }
+    
+  
     //(image/png or image/jpeg)
     setImageType(file.type);
 
@@ -382,6 +390,18 @@ const handleCropSave = async () => {
           Settings saved successfully!
         </Alert>
       </Snackbar>
+      {/*  Upload Error Snackbar */}
+        <Snackbar
+        open={!!uploadError}
+        autoHideDuration={4000}
+        onClose={() => setUploadError("")}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+        <Alert onClose={() => setUploadError("")} severity="error" sx={{ width: "100%" }}>
+          {uploadError}
+        </Alert>
+      </Snackbar>
+
     </Box>
   );
 };
