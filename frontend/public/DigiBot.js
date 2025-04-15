@@ -36,17 +36,14 @@
       iframe.style.maxWidth = "600px";
       iframe.style.height = "80vh"; 
       iframe.style.maxHeight = "90vh";
-     
-     
-     
-   
+        
+        
       iframe.style.position = "fixed";
       iframe.style.bottom = "90px";  
       iframe.style.right = "20px";
       iframe.style.border = "none";
       iframe.style.borderRadius = "20px";
-      iframe.style.zIndex = "9999";
-      
+      iframe.style.zIndex = "9999";   
 
 
       iframe.style.display = "none";
