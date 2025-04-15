@@ -161,8 +161,8 @@ const FullPageDigibot = () => {
         bottom: 20,
         right: { xs: "50%", sm: 20 }, // Center on very small screens
         transform: { xs: "translateX(50%)", sm: "none" }, // Only when right is 50%
-        width: { xs: "90vw", sm: 360, md: 400 }, // Responsive width
-        height: { xs: "75vh", sm: 600 }, // Responsive height
+        width: { xs: "90vw", sm: 360, md: 400 }, //  Responsive width
+        height: { xs: "75vh", sm: 600 }, //  Responsive height
         maxHeight: "85vh",
         borderRadius: 3,
         boxShadow: 6,
