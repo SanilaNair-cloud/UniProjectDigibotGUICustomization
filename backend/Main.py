@@ -21,6 +21,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+
 security = HTTPBearer()
 
 KEY_DIR = os.path.join(os.path.dirname(__file__), "keys")
@@ -31,7 +32,57 @@ with open(os.path.join(KEY_DIR, "public.pem"), "r") as f:
 
 ALGORITHM = "RS256"
 
-app = FastAPI()
+tags_metadata = [
+    {
+        "name": "Authentication – Company SSO",
+        "description": "SSO-based login for company admins/users. JWT-based token generation and validation for accessing DigiBot."
+    },
+    {
+        "name": "Authentication – DigiMark Admin Login",
+        "description": "Secure login for DigiMark Super Admin to access internal sentiment dashboard. JWT-based access control."
+    },
+    {
+        "name": "Admin Settings",
+        "description": "Admin customization of chatbot UI (logo, colors, fonts, tone, audience). Stored via multipart form data."
+    },
+    {
+        "name": "Chatbot – Relay & Webhook",
+        "description": "Sends user queries to webhook server. Uses admin settings (audience/tone) for context enrichment."
+    },
+    {
+        "name": "Feedback",
+        "description": "Stores ratings and comments from users. Performs sentiment analysis using TextBlob NLP and stores scores."
+    },
+    {
+        "name": "Data Science Dashboard",
+        "description": "APIs supporting DigiMark sentiment dashboard: sentiment scores, feedback aggregation, company-wise analysis."
+    },
+    {
+        "name": "Company Info",
+        "description": "Fetches all company metadata (company ID and name) for dashboard filtering and selection."
+    },
+    {
+        "name": "Digibot – Redirect",
+        "description": "Redirects to the chatbot demo UI with pre-generated token for testing/demo purposes."
+    }
+]
+
+
+
+
+app = FastAPI(
+    title="DigiBot API",
+    description="Backend APIs for DigiBot – public UI, internal staff UI, and DigiMark admin dashboard.",
+    version="1.0.0",
+    openapi_tags=tags_metadata,
+    license_info={
+        "name": "DigiMark Internal License",
+        "url": "https://digimark.com.au/license"
+    }
+)
+
+
+
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
@@ -95,7 +146,7 @@ def analyze_sentiment(text):
         return "Neutral", polarity
 
 
-@app.post("/admin-settings/")
+@app.post("/admin-settings/", tags=["Admin Settings – Save"])
 async def save_or_update_admin_settings(
     logo: UploadFile = File(...),
     background_color: str = Form(...),
@@ -109,7 +160,7 @@ async def save_or_update_admin_settings(
     company_name: str = Form(...),
     company_id: str = Form(...),
     db: Session = Depends(get_db)
-):
+    ):
     uploads_dir = os.path.join(os.getcwd(), "uploads")
     os.makedirs(uploads_dir, exist_ok=True)
 
@@ -162,7 +213,7 @@ class AuthResponse(BaseModel):
     company_name: str
     chatbot_url: str
 
-@app.get("/auth", response_model=AuthResponse)
+@app.get("/auth", response_model=AuthResponse , tags=["Authentication – Company SSO"])
 def authenticate_user(auth: str = Query(...)):
     payload = verify_jwt_token(auth)
     return {
@@ -174,16 +225,16 @@ def authenticate_user(auth: str = Query(...)):
     }
 
 
-@app.get("/")
+@app.get("/" , tags=["Digibot – Redirect"])
 def root_redirect():
-    user_id = "san23@example.com"
+    user_id = "test123admin@example.com"
     user_type = "admin"
-    company_id = "san123"
-    company_name = "Sanfran123"
+    company_id = "test123"
+    company_name = "test123"
     token = create_jwt_token(user_id, user_type, company_id, company_name)
     return RedirectResponse(url=f"http://localhost:3000/company-portal?auth={token}")
 
-@app.get("/admin-settings/{company_id}")
+@app.get("/admin-settings/{company_id}", tags=["Admin Settings – Fetch"])
 def get_admin_settings(company_id: str, db: Session = Depends(get_db)):
     settings = db.query(AdminSettings).filter(AdminSettings.company_id == company_id).first()
     print("REturned logo:", settings.logo)
@@ -193,7 +244,7 @@ def get_admin_settings(company_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Settings not found")
     return settings
 
-@app.post("/chat")
+@app.post("/chat" ,tags=["Digibot"])
 async def relay_to_webhook(request: Request, db: Session = Depends(get_db)):
     body = await request.json()
 
@@ -235,7 +286,7 @@ async def relay_to_webhook(request: Request, db: Session = Depends(get_db)):
    
 
 
-@app.post("/feedback")
+@app.post("/feedback",tags=["Feedback"])
 def save_feedback(feedback: FeedbackSchema, db: Session = Depends(get_db)):
     sentiment_label, sentiment_score = analyze_sentiment(feedback.text)
 
@@ -244,8 +295,8 @@ def save_feedback(feedback: FeedbackSchema, db: Session = Depends(get_db)):
         text=feedback.text,
         company_id=feedback.company_id,
         created_at=datetime.utcnow().isoformat(),
-        sentiment=sentiment_label,           # ✅ Save sentiment
-        sentiment_score=sentiment_score      # ✅ Save score
+        sentiment=sentiment_label,           
+        sentiment_score=sentiment_score      
     )
 
     db.add(new_feedback)
@@ -255,7 +306,7 @@ def save_feedback(feedback: FeedbackSchema, db: Session = Depends(get_db)):
 
 """Data science solution part"""
 
-@app.post("/superadmin-auth")
+@app.post("/superadmin-auth" ,tags=["Authentication – DigiMark Admin Login"])
 def superadmin_auth(email: str = Form(...)):
     if email == "digimark@admin.com":
         token = create_jwt_token(email, "superadmin", "digimark", "DigiMark")
@@ -272,7 +323,7 @@ def get_all_companies(db: Session = Depends(get_db)):
 
 
     
-@app.get("/feedback-all")
+@app.get("/feedback-all",tags=["Data Science Dashboard"])
 def get_all_feedback(
     db: Session = Depends(get_db),
     credentials: HTTPAuthorizationCredentials = Security(security)
