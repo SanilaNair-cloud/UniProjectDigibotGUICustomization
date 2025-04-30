@@ -203,7 +203,7 @@ async def save_or_update_admin_settings(
     company_name: str = Form(...),
     company_id: str = Form(...),
     db: Session = Depends(get_db)
-    ):
+):
     uploads_dir = os.path.join(os.getcwd(), "uploads")
     os.makedirs(uploads_dir, exist_ok=True)
 
@@ -217,8 +217,8 @@ async def save_or_update_admin_settings(
             f.write(await logo.read())
 
     if existing_settings:
-        if logo_filename:  
-            existing_settings.logo = logo_filename      
+        if logo_filename:
+            existing_settings.logo = logo_filename
         existing_settings.background_color = background_color
         existing_settings.font_style = font_style
         existing_settings.font_size = font_size
@@ -228,8 +228,12 @@ async def save_or_update_admin_settings(
         existing_settings.tone = tone
         existing_settings.admin_id = admin_id
         existing_settings.company_name = company_name
+
+        db.commit()
+        return {"message": "Admin settings updated successfully!"}
+
     else:
-            new_settings = AdminSettings(
+        new_settings = AdminSettings(
             logo=logo_filename or "",
             background_color=background_color,
             font_style=font_style,
@@ -242,12 +246,10 @@ async def save_or_update_admin_settings(
             company_name=company_name,
             company_id=company_id
         )
-    db.add(new_settings)
+        db.add(new_settings)
+        db.commit()
+        return {"message": "Admin settings saved successfully!"}
 
-    db.commit()
-    return {"message": "Admin settings saved successfully!"}
-
- 
 
 # ----------------------------
 # Authentication and Redirect Endpoints
