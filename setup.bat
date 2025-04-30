@@ -1,65 +1,79 @@
 @echo off
-echo 🔧 Starting DigiBot project setup...
+REM DigiBot Setup Launcher — ANSI encoding, run in CMD
 
-REM --- BACKEND SETUP ---
-cd backend
+cd /d %~dp0
+echo Starting DigiBot setup...
+echo.
 
-IF NOT EXIST venv (
-    echo 🐍 Creating virtual environment...
-    python -m venv venv
-    echo ✅ Virtual environment created.
-) ELSE (
-    echo ✅ Virtual environment already exists.
+REM --- BACKEND ---
+if exist backend (
+    echo [Backend] setting up...
+    pushd backend
+
+    if not exist venv (
+        echo  Creating virtual environment...
+        python -m venv venv
+    )
+
+    echo  Installing backend dependencies...
+    call venv\Scripts\activate
+    pip install --upgrade pip
+    pip install -r requirements.txt
+
+    echo  Launching FastAPI on http://localhost:8000...
+    start "FastAPI" cmd /k "call venv\Scripts\activate && uvicorn Main:app --host 127.0.0.1 --port 8000 --reload"
+    popd
+) else (
+    echo [Backend] folder not found — skipping.
 )
+echo.
 
-echo 📦 Activating virtual environment and installing dependencies...
-call venv\Scripts\activate
-pip install -r requirements.txt
+REM --- FRONTEND ---
+if exist frontend (
+    echo [Frontend] setting up...
+    pushd frontend
 
-REM Start FastAPI backend in a new terminal window
-echo 🚀 Starting FastAPI backend (Uvicorn)...
-start cmd /k "cd backend && call venv\Scripts\activate && uvicorn Main:app --reload"
+    if exist package.json (
+        echo  Installing frontend dependencies...
+        npm install
 
-cd ..
+        echo  Launching React on http://localhost:3000...
+        start "React" cmd /k "set PORT=3000&& npm start"
+    ) else (
+        echo [Frontend] package.json not found — skipping.
+    )
 
-REM --- FRONTEND SETUP ---
-cd frontend
-
-IF EXIST package.json (
-    echo 🌐 Installing frontend dependencies...
-    npm install
-    echo ✅ Frontend dependencies installed.
-
-    REM Start React frontend in a new terminal window
-    echo 🚀 Starting React frontend...
-    start cmd /k "cd frontend && npm start"
-) ELSE (
-    echo ⚠️ package.json not found. Skipping frontend setup.
+    popd
+) else (
+    echo [Frontend] folder not found — skipping.
 )
+echo.
 
-cd ..
+REM --- WEBHOOK SERVER ---
+if exist webhook-server (
+    echo [Webhook] setting up...
+    pushd webhook-server
 
-REM --- WEBHOOK SERVER SETUP ---
-cd webhook-server
-
-IF EXIST webhookserver.js (
-    echo 📦 Ensuring webhook server dependencies are installed...
-
-    IF NOT EXIST package.json (
-        echo 🧩 Creating package.json...
+    if not exist package.json (
+        echo  Creating package.json...
         npm init -y
     )
 
-    echo 📦 Installing express locally...
+    echo  Installing express...
     npm install express
 
-    echo 🔗 Starting Webhook Server...
-    start cmd /k "cd webhook-server && node webhookserver.js"
-    echo ✅ Webhook server started.
-) ELSE (
-    echo ⚠️ webhookserver.js not found. Skipping webhook server startup.
+    echo  Launching webhook server...
+    start "Webhook" cmd /k "node webhookserver.js"
+    popd
+) else (
+    echo [Webhook] folder not found — skipping.
 )
+echo.
 
-cd ..
+REM --- OPEN BROWSER ---
+echo Opening browser to FastAPI at http://localhost:8000
+start "" "http://localhost:8000"
+echo.
 
-
+echo All services launched. Check the new CMD windows for logs.
+pause

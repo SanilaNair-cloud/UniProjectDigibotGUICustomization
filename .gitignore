@@ -17,3 +17,6 @@ backend/uploads/
 
 # Log files (optional)
 *.log
+__pycache__/
+*.pyc
+venv/

@@ -1,3 +1,10 @@
+/**
+ * Feedback – User Feedback Form for DigiBot
+ *
+ * This component allows users to rate their chatbot experience and submit written feedback.
+ * After submission, a thank-you message is shown and the user is redirected back to the main screen.
+ */
+
 import React, { useState } from "react";
 import {
   Box,
@@ -14,19 +21,20 @@ import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import SendIcon from "@mui/icons-material/Send";
 
 const Feedback = () => {
+  // State variables for rating, feedback text, and submission status
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
   const [feedbackGiven, setFeedbackGiven] = useState(false);
 
+  // Handle feedback submission to backend API
   const handleSubmit = async () => {
     const payload = {
       rating,
       text,
-      company_id: localStorage.getItem("companyId"), // ✅ Make it dynamic
+      company_id: localStorage.getItem("companyId"), // Dynamically retrieve company ID
     };
     console.log("✅ Submitting feedback for:", payload);
 
-  
     try {
       const response = await fetch("http://localhost:8000/feedback", {
         method: "POST",
@@ -35,11 +43,12 @@ const Feedback = () => {
         },
         body: JSON.stringify(payload),
       });
-  
+
       if (response.ok) {
         console.log("✅ Feedback submitted:", payload);
-        setFeedbackGiven(true);
-  
+        setFeedbackGiven(true); // Show thank-you message
+
+        // Redirect after short delay
         setTimeout(() => {
           window.parent.postMessage({ type: "NAVIGATE", route: "" }, "*");
         }, 1500);
@@ -50,7 +59,6 @@ const Feedback = () => {
       console.error("❌ Error submitting feedback:", error);
     }
   };
-  
 
   return (
     <Box
@@ -76,6 +84,7 @@ const Feedback = () => {
             boxShadow: 4,
           }}
         >
+          {/* Feedback Form */}
           {!feedbackGiven ? (
             <>
               <Stack spacing={2} alignItems="center" mb={3}>
@@ -90,6 +99,7 @@ const Feedback = () => {
                 </Typography>
               </Stack>
 
+              {/* Rating input */}
               <Box textAlign="center" mb={2}>
                 <Typography variant="body1">Rate your experience:</Typography>
                 <Rating
@@ -100,6 +110,7 @@ const Feedback = () => {
                 />
               </Box>
 
+              {/* Feedback text input */}
               <TextField
                 fullWidth
                 multiline
@@ -109,6 +120,7 @@ const Feedback = () => {
                 onChange={(e) => setText(e.target.value)}
               />
 
+              {/* Submit button */}
               <Button
                 variant="contained"
                 endIcon={<SendIcon />}
@@ -120,6 +132,7 @@ const Feedback = () => {
               </Button>
             </>
           ) : (
+            // Thank-you message
             <Box textAlign="center" mt={2}>
               <Typography variant="h5" fontWeight={600} color="green" mb={2}>
                 🎉 Thank you for your feedback!

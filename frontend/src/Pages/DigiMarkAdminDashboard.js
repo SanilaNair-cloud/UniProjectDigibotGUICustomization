@@ -14,6 +14,8 @@ PointElement, LineElement, Tooltip, Legend, TimeScale
 import { Bar, Pie, Line } from "react-chartjs-2";
 import 'chartjs-adapter-date-fns';
 import { format } from "date-fns";
+import LogoutIcon from "@mui/icons-material/Logout"; 
+
 
 // Register Chart.js modules
 ChartJS.register(
@@ -198,11 +200,26 @@ useEffect(() => {
     <Box p={4} maxWidth="1400px" margin="auto">
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" fontWeight="bold">DigiMark Admin Dashboard</Typography>
-        <Button onClick={() => {
-          localStorage.removeItem("digimark_token");
-          sessionStorage.removeItem("user");
-          window.location.href = "/digimark-login";
-        }}>LOGOUT</Button>
+        <Button
+          variant="contained"        // Make it a contained/filled button
+          color="error"              // Pick from [primary | secondary | error | warning | info | success], or your custom theme color
+          startIcon={<LogoutIcon />} // Add an icon to the left
+          sx={{
+            textTransform: "none",         // Prevent the label from being forced to UPPERCASE
+            fontWeight: "bold",            // Make it stand out a bit
+            borderRadius: "20px",          // Rounder corners
+            padding: "0.6rem 1.4rem",      // More horizontal padding
+            boxShadow: "0px 3px 8px rgba(0, 0, 0, 0.2)", // A bit of a shadow
+          }}
+          onClick={() => {
+            localStorage.removeItem("digimark_token");
+            sessionStorage.removeItem("user");
+            window.location.href = "/digimark-login";
+          }}
+        >
+          Logout
+        </Button>
+
       </Box>
 
       <Grid container spacing={2} mb={2}>

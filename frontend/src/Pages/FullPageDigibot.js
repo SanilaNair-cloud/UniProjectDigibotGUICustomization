@@ -1,3 +1,11 @@
+/**
+ * FullPageDigibot – Fullscreen Floating Chatbot Component
+ *
+ * This component renders the DigiBot chat interface in a fixed floating window.
+ * It listens for user data from the parent window, fetches admin settings,
+ * handles sending/receiving chat messages, and shows branding and theming per company.
+ */
+
 import React, { useEffect, useRef, useState } from "react";
 import { keyframes } from '@emotion/react';
 import {
@@ -12,6 +20,7 @@ import {
 import { Settings, Close, Send } from "@mui/icons-material";
 
 const FullPageDigibot = () => {
+  // Refs and state variables
   const containerRef = useRef(null);
   const [message, setMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
@@ -21,28 +30,30 @@ const FullPageDigibot = () => {
   const [logoUrl, setLogoUrl] = useState("");
   const [greeting, setGreeting] = useState("");
   const [theme, setTheme] = useState({});
-  const [version, setVersion] = useState(0);
+  const [version, setVersion] = useState(0); // Forces re-render when theme updates
   const isEmbedded = window.self !== window.top;
-  const slideUp = keyframes`
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-`;
 
+  // Animation for sliding chatbot into view
+  const slideUp = keyframes`
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  `;
+
+  // Fetch company-specific chatbot UI settings
   const fetchSettings = async (companyId, userId) => {
     try {
       const res = await fetch(`http://localhost:8000/admin-settings/${companyId}`);
       const settings = await res.json();
       setLogoUrl(`http://localhost:8000/uploads/${settings.logo}?v=${Date.now()}`); // Fetching latest image
       setTheme(settings);
-      console.log("✅ Final theme object:", settings);
+      setVersion((prev) => prev + 1); // Trigger re-render to apply theme
 
-      setVersion((prev) => prev + 1);
       const name = userId.split("@")[0];
       setGreeting(`Hi ${name}, how can I help?`);
     } catch (err) {
@@ -50,6 +61,7 @@ const FullPageDigibot = () => {
     }
   };
 
+  // Receive user info and refresh messages from parent window
   useEffect(() => {
     const handleUserInfo = (event) => {
       if (event.data?.type === "USER_INFO") {
@@ -59,6 +71,7 @@ const FullPageDigibot = () => {
         setCompanyName(companyName);
         fetchSettings(companyId, userId);
 
+        // Store user info locally
         localStorage.setItem("companyId", companyId);
         localStorage.setItem("companyName", companyName);
         localStorage.setItem("userId", userId);
@@ -77,6 +90,7 @@ const FullPageDigibot = () => {
       }
     };
 
+    // Add message listeners
     window.addEventListener("message", handleUserInfo);
     window.addEventListener("message", handleRefresh);
     return () => {
@@ -85,25 +99,26 @@ const FullPageDigibot = () => {
     };
   }, [isEmbedded]);
 
+  // Send user message to backend and handle chatbot response
   const handleSend = async () => {
     if (!message.trim()) return;
-  
+
     const userMessage = message;
     setMessage("");
-  
-    // ✅ Show user's message in the chat
+
+    // Add user's message to chat history
     setChatHistory((prev) => [...prev, { sender: "user", text: userMessage }]);
-  
-    // ⏳ Typing indicator
+
+    // Add bot typing placeholder
     const loadingId = Date.now();
     setChatHistory((prev) => [
       ...prev,
       { sender: "bot", text: "✍️ DigiBot is typing...", id: loadingId }
     ]);
-  
+
     try {
       const companyId = localStorage.getItem("companyId");
-  
+
       const response = await fetch("http://localhost:8000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -112,10 +127,10 @@ const FullPageDigibot = () => {
           company_id: companyId,
         }),
       });
-  
+
       const data = await response.json();
-  
-      // ✅ Replace typing with actual reply
+
+      // Replace typing placeholder with actual bot response
       setChatHistory((prev) =>
         prev.map((msg) =>
           msg.id === loadingId
@@ -134,23 +149,21 @@ const FullPageDigibot = () => {
       );
     }
   };
-  
-  
-  
-  
 
+  // Handle click to navigate admin to settings
   const handleGoToAdmin = () => {
     window.parent.postMessage({ type: "NAVIGATE", route: "admin-settings" }, "*");
   };
 
+  // Handle click to close the bot and redirect to feedback form
   const handleClose = () => {
     window.parent.postMessage({ type: "NAVIGATE", route: "feedback" }, "*");
   };
 
+  // Show loading message until user data is available
   if (!userRole || !userId) {
     return <Box p={2} textAlign="center">Loading chatbot...</Box>;
   }
-  console.log("🖼️ Outer background color being used:", theme.background_color);
 
   return (
     <Box
@@ -168,7 +181,7 @@ const FullPageDigibot = () => {
         boxShadow: 6,
         zIndex: 1000,
         overflow: "hidden",
-        animation: `${slideUp} 0.4s ease-in-out`, 
+        animation: `${slideUp} 0.4s ease-in-out`,
       }}
     >
       <Paper
@@ -182,13 +195,13 @@ const FullPageDigibot = () => {
           backgroundColor: "transparent",
         }}
       >
-        
-        <Stack direction="row" justifyContent="space-between" alignItems="center" p={2} sx={{
+        {/* Chatbot Header with Logo, Company Name, and Actions */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" p={2}
+          sx={{
             backgroundColor: theme.background_color || "#ffffff",
             transition: "background-color 0.3s ease",
           }}>
           <Stack direction="row" spacing={2} alignItems="center">
-            {/*/logo192.png*/}
             <Avatar src={logoUrl || "/Images/speech-bubble.png"} sx={{ width: 40, height: 40, borderRadius: 2 }} />
             <Box>
               <Typography variant="h6" fontSize={18} m={0}>DigiBot</Typography>
@@ -207,6 +220,7 @@ const FullPageDigibot = () => {
           </Box>
         </Stack>
 
+        {/* Chat Message Area */}
         <Box flexGrow={1} overflow="auto" mb={2} p={1} bgcolor="#f9f9f9" borderRadius={2}>
           {[{ sender: "bot", text: greeting }, ...chatHistory].map((msg, idx) => (
             <Box key={idx} textAlign={msg.sender === "user" ? "right" : "left"} mb={1}>
@@ -226,7 +240,9 @@ const FullPageDigibot = () => {
           ))}
         </Box>
 
-        <Stack direction="row" spacing={1} px={2} pb={2} sx={{
+        {/* Message Input Field */}
+        <Stack direction="row" spacing={1} px={2} pb={2}
+          sx={{
             backgroundColor: theme.background_color || "#ffffff",
             transition: "background-color 0.3s ease",
           }}>
