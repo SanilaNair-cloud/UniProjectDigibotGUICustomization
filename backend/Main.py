@@ -46,7 +46,6 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-
 # for swagger UI to test endpoints
 tags_metadata = [
     {
@@ -111,12 +110,10 @@ app = FastAPI(
     }
 )
 
-
 # Enable static file access (logo uploads)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOADS_DIR = os.path.join(BASE_DIR, "uploads")
-
 
 
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
@@ -185,7 +182,6 @@ def analyze_sentiment(text):
         return "Neutral", polarity
 
 
-
 # ---------------------------------------------------
 # Save or update Admin UI Settings (branding typography, audience and tone)
 # ---------------------------------------------------
@@ -250,7 +246,6 @@ async def save_or_update_admin_settings(
         db.commit()
         return {"message": "Admin settings saved successfully!"}
 
-
 # ----------------------------
 # Authentication and Redirect Endpoints
 # ----------------------------
@@ -277,10 +272,10 @@ def authenticate_user(auth: str = Query(...)):
 # Redirects to the digibot UI with a generated token (for testing/demo)
 @app.get("/" , tags=["Digibot – Redirect"])
 def root_redirect():
-    user_id = "testing123@example.com"
+    user_id = "test111@example.com"
     user_type = "admin"
-    company_id = "test123"
-    company_name = "Test Company"
+    company_id = "test111"
+    company_name = "Test Company Site"
     token = create_jwt_token(user_id, user_type, company_id, company_name)
     return RedirectResponse(url=f"http://localhost:3000/company-portal?auth={token}")
 
@@ -368,7 +363,6 @@ def superadmin_auth(email: str = Form(...)):
 def get_all_companies(db: Session = Depends(get_db)):
     results = db.query(AdminSettings.company_id, AdminSettings.company_name).distinct().all()
     return [{"company_id": cid, "company_name": cname} for cid, cname in results]
-
 
 
  # Returns all feedback data (restricted to superadmin)    
