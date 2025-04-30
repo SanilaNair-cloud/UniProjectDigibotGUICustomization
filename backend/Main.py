@@ -1,3 +1,25 @@
+"""
+main.py – DigiBot Backend API
+
+This script contains the backend endpoints for the below functionalities:
+ Company SSO authentication and JWT-based access control
+- Admin settings configuration for customizing DigiBot UI (branding of UI , tone and audience)
+- Feedback collection and sentiment analysis using TextBlob
+- Internal staff UI and public-facing DigiBot integration via webhook relay
+- Superadmin authentication and access to the sentiment analytics dashboard
+- Static file handling for uploaded company logos
+- Redirect functionality for testing/demo purposes
+
+Note:
+Both the public-facing DigiBot UI (embedded in client portals) and the internal staff UI rely on webhook communication 
+with an n8n workflow for query processing. While the POST request to the production webhook is not yet functional
+ (pending client setup), the integration is implemented and tested with a mocked response. 
+ The system is fully prepared to switch to the live workflow once available.
+
+Developed with FastAPI + PostgreSQL + TextBlob
+Author: [TechSphereTeam]
+"""
+
 # ----------------------------
 # Importing required libraries
 # ----------------------------
@@ -24,27 +46,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-"""
-main.py – DigiBot Backend API
 
-This script contains the backend endpoints for the below functionalities:
- Company SSO authentication and JWT-based access control
-- Admin settings configuration for customizing DigiBot UI (branding of UI , tone and audience)
-- Feedback collection and sentiment analysis using TextBlob
-- Internal staff UI and public-facing DigiBot integration via webhook relay
-- Superadmin authentication and access to the sentiment analytics dashboard
-- Static file handling for uploaded company logos
-- Redirect functionality for testing/demo purposes
-
-Note:
-Both the public-facing DigiBot UI (embedded in client portals) and the internal staff UI rely on webhook communication 
-with an n8n workflow for query processing. While the POST request to the production webhook is not yet functional
- (pending client setup), the integration is implemented and tested with a mocked response. 
- The system is fully prepared to switch to the live workflow once available.
-
-Developed with FastAPI + PostgreSQL + TextBlob
-Author: [TechSphereTeam]
-"""
 # for swagger UI to test endpoints
 tags_metadata = [
     {
@@ -163,7 +165,6 @@ def verify_jwt_token(token: str):
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="superadmin-auth")
 def verify_superadmin_token(token: str = Depends(oauth2_scheme)):
     payload = verify_jwt_token(token)
-    #print("🔑 Payload:", payload);
     if payload["user_type"] != "superadmin":
         raise HTTPException(status_code=403, detail="Not authorized")
     return payload
@@ -275,9 +276,6 @@ def root_redirect():
 @app.get("/admin-settings/{company_id}", tags=["Admin Settings – Fetch"])
 def get_admin_settings(company_id: str, db: Session = Depends(get_db)):
     settings = db.query(AdminSettings).filter(AdminSettings.company_id == company_id).first()
-    #print("REturned logo:", settings.logo)
-    #print("🧾 Returned background_color:", settings.background_color)
-
     if not settings:
         raise HTTPException(status_code=404, detail="Settings not found")
     return settings
@@ -339,7 +337,6 @@ def save_feedback(feedback: FeedbackSchema, db: Session = Depends(get_db)):
 
     db.add(new_feedback)
     db.commit()
-    #print("✅ Feedback saved with sentiment:", feedback)
     return {"message": "Feedback and sentiment saved successfully!"}
 
 # ----------------------------
@@ -358,7 +355,6 @@ def superadmin_auth(email: str = Form(...)):
 @app.get("/admin-settings-all")
 def get_all_companies(db: Session = Depends(get_db)):
     results = db.query(AdminSettings.company_id, AdminSettings.company_name).distinct().all()
-    print("📦 All companies fetched:", results)
     return [{"company_id": cid, "company_name": cname} for cid, cname in results]
 
 
