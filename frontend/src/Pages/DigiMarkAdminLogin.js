@@ -49,7 +49,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         localStorage.setItem("digimark_token", token);
         sessionStorage.setItem("user", JSON.stringify(decoded));
   
-        console.log("✅ Token stored:", localStorage.getItem("digimark_token"));
+     
   
         // ✅ Wait for confirmation before navigating
         setTimeout(() => {

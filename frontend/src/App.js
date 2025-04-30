@@ -11,7 +11,6 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* ✅ Redirect from root to /company-portal */}
         <Route path="/" element={<Navigate to="/company-portal" replace />} />
 
         <Route path="/company-portal" element={<CompanyPortal />}>
