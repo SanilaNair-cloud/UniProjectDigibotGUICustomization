@@ -1,3 +1,17 @@
+/**
+ DigiMark Super Admin Login Page
+ *
+ * This component handles secure login for the DigiMark Super Admin user.
+ * It checks for an existing JWT token, validates email input, and sends a POST request
+ * to the backend (/superadmin-auth) for authentication.
+ * 
+ * On successful login, it stores the JWT and user info in local/session storage
+ * and redirects to the DigiMark Admin Dashboard.
+ *
+ * Technologies used: React, React Router, Material UI
+ * Author: TechSphere Team
+ *
+ */
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -12,15 +26,12 @@ import { useNavigate } from "react-router-dom";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-
   const DigiMarkAdminLogin = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [touched, setTouched] = useState(false);
- 
-
   const navigate = useNavigate();
-
+  // On load redirect if already logged in as superadmin
   useEffect(() => {
     const token = localStorage.getItem("digimark_token");
     const user = JSON.parse(sessionStorage.getItem("user"));
@@ -32,6 +43,8 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
  
 
+ 
+  // Handles login POST to /superadmin-auth
   const handleLogin = async () => {
     try {
       const response = await fetch("http://localhost:8000/superadmin-auth", {
@@ -49,9 +62,6 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         localStorage.setItem("digimark_token", token);
         sessionStorage.setItem("user", JSON.stringify(decoded));
   
-     
-  
-        // ✅ Wait for confirmation before navigating
         setTimeout(() => {
           navigate("/digimark-dashboard");
         }, 300); 
@@ -63,9 +73,10 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     }
   };
   
+  // Clears session/token on logout
   const handleLogout = () => {
     sessionStorage.removeItem("user");
-    localStorage.removeItem("digimark_token"); // ✅ also remove token
+    localStorage.removeItem("digimark_token"); 
     setEmail("");
     setError("");
   };

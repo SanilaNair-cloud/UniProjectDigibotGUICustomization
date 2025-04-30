@@ -1,4 +1,12 @@
-# schemas.py
+"""
+schemas.py – Pydantic Models for DigiBot API
+
+Defines request and response data schemas used in FastAPI endpoints:
+- FeedbackSchema: for validating user-submitted feedback
+- AuthResponse: for structuring the authentication response after JWT verification
+
+These models ensure data consistency between frontend and backend during API communication.
+"""
 from pydantic import BaseModel
 
 class FeedbackSchema(BaseModel):
