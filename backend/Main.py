@@ -180,7 +180,7 @@ def analyze_sentiment(text):
         return "Neutral", polarity
 
 
-@app.post("/admin-settings/", tags=["Admin Settings – Save"])
+
 # ---------------------------------------------------
 # Save or update Admin UI Settings (branding typography, audience and tone)
 # ---------------------------------------------------
@@ -237,7 +237,7 @@ async def save_or_update_admin_settings(
             company_name=company_name,
             company_id=company_id
         )
-        db.add(new_settings)
+    db.add(new_settings)
 
     db.commit()
     return {"message": "Admin settings saved successfully!"}
