@@ -1,5 +1,5 @@
 """
-Database Models for DigiBot
+models.py is Database Models for DigiBot
 
 Defines the structure of database tables using SQLAlchemy ORM.
 
