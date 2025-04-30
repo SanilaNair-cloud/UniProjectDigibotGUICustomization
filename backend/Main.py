@@ -95,7 +95,7 @@ def analyze_sentiment(text):
         return "Neutral", polarity
 
 
-@app.post("/admin-settings/")
+@app.post("/admin-settings/", tags=["Admin Settings – Save"])
 async def save_or_update_admin_settings(
     logo: UploadFile = File(None),  # make optional
     background_color: str = Form(...),
@@ -109,7 +109,7 @@ async def save_or_update_admin_settings(
     company_name: str = Form(...),
     company_id: str = Form(...),
     db: Session = Depends(get_db)
-):
+    ):
     uploads_dir = os.path.join(os.getcwd(), "uploads")
     os.makedirs(uploads_dir, exist_ok=True)
 
@@ -154,7 +154,6 @@ async def save_or_update_admin_settings(
 
     db.commit()
     return {"message": "Admin settings saved successfully!"}
-
 
 
 class AuthResponse(BaseModel):
