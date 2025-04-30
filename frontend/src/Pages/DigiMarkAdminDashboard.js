@@ -1,9 +1,12 @@
+// React and state management
 import React, { useEffect, useState } from "react";
+// MUI components for layout and UI controls
 import {
 Box, Typography, Button, Grid, Paper, Divider, Table, TableBody,
 TableCell, TableContainer, TableHead, TableRow, MenuItem, Select,
 InputLabel, FormControl, TextField, Switch, FormControlLabel
 } from "@mui/material";
+// Chart.js and its modules for rendering charts
 import {
 Chart as ChartJS, BarElement, CategoryScale, LinearScale, ArcElement,
 PointElement, LineElement, Tooltip, Legend, TimeScale
@@ -12,11 +15,13 @@ import { Bar, Pie, Line } from "react-chartjs-2";
 import 'chartjs-adapter-date-fns';
 import { format } from "date-fns";
 
+// Register Chart.js modules
 ChartJS.register(
 BarElement, CategoryScale, LinearScale, ArcElement, PointElement,
 LineElement, Tooltip, Legend, TimeScale
 );
 
+// Main Admin Dashboard component
 const DigiMarkAdminDashboard = () => {
 const [companyList, setCompanyList] = useState([]);
 const [feedbackData, setFeedbackData] = useState([]);
@@ -27,16 +32,18 @@ const [viewMode, setViewMode] = useState("avg");
 
 
 
+  // Fetch feedback and company data on component load
 useEffect(() => {
   const token = localStorage.getItem("digimark_token");
   const user = JSON.parse(sessionStorage.getItem("user"));
 
+// Validate superadmin access
   if (!token || user?.user_type !== "superadmin") {
     console.warn("⚠️ Not authorized or token missing");
     return;
   }
 
-
+ // Fetch all feedback
   fetch("http://localhost:8000/feedback-all", {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -69,7 +76,7 @@ useEffect(() => {
 
 
 
-
+ // Filter feedback based on company, comment, and date range
   const filteredFeedback = feedbackData.filter(fb => {
   const companyMatch =
     selectedCompany === "all" ||
@@ -103,7 +110,8 @@ useEffect(() => {
   filteredFeedback.reduce((sum, fb) => sum + (fb.sentiment_score || 0), 0) /
   filteredFeedback.length
   ).toFixed(2) : "0.00";
-  
+
+   // Bar chart for rating per company (toggle between avg and count mode)
   let ratingBarData;
   if (viewMode === "avg") {
     const ratingSums = {};
@@ -148,7 +156,7 @@ useEffect(() => {
     };
   }
   
-  
+   // Pie chart for sentiment distribution
   const sentimentPieData = {
   labels: Object.keys(sentimentCounts),
   datasets: [{
@@ -158,6 +166,7 @@ useEffect(() => {
   }],
   };
   
+  // Line chart for sentiment score over time
   const sentimentLineData = {
   datasets: [{
   label: "Sentiment Score Over Time",
@@ -167,7 +176,8 @@ useEffect(() => {
   fill: false,
   }],
   };
-  
+
+   // Bar chart for count of each rating
   const ratingCountBarData = {
   labels: Object.keys(ratingCounts),
   datasets: [{

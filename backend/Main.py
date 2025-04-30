@@ -148,7 +148,7 @@ def analyze_sentiment(text):
 
 @app.post("/admin-settings/", tags=["Admin Settings – Save"])
 async def save_or_update_admin_settings(
-    logo: UploadFile = File(...),
+    logo: UploadFile = File(None),  # make optional
     background_color: str = Form(...),
     font_style: str = Form(...),
     font_size: str = Form(...),
@@ -164,18 +164,19 @@ async def save_or_update_admin_settings(
     uploads_dir = os.path.join(os.getcwd(), "uploads")
     os.makedirs(uploads_dir, exist_ok=True)
 
-    logo_filename = f"{company_id}_{logo.filename}"
-    file_path = os.path.join(uploads_dir, logo_filename)
-
-    with open(file_path, "wb") as f:
-        f.write(await logo.read())
-
-  
     existing_settings = db.query(AdminSettings).filter(AdminSettings.company_id == company_id).first()
 
+    logo_filename = None
+    if logo:
+        logo_filename = f"{company_id}_{logo.filename}"
+        file_path = os.path.join(uploads_dir, logo_filename)
+        with open(file_path, "wb") as f:
+            f.write(await logo.read())
+
     if existing_settings:
-      
-        existing_settings.logo = logo_filename
+        if logo_filename:  # ✅ only update if new image uploaded
+            existing_settings.logo = logo_filename
+        # else: retain current logo
         existing_settings.background_color = background_color
         existing_settings.font_style = font_style
         existing_settings.font_size = font_size
@@ -186,9 +187,9 @@ async def save_or_update_admin_settings(
         existing_settings.admin_id = admin_id
         existing_settings.company_name = company_name
     else:
-    
+        # 🆕 if no logo uploaded at all, store an empty string (or default logo)
         new_settings = AdminSettings(
-            logo=logo_filename,
+            logo=logo_filename or "",
             background_color=background_color,
             font_style=font_style,
             font_size=font_size,
@@ -204,6 +205,7 @@ async def save_or_update_admin_settings(
 
     db.commit()
     return {"message": "Admin settings saved successfully!"}
+
 
 
 class AuthResponse(BaseModel):

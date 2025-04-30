@@ -1,5 +1,7 @@
+// Import core React & routing hooks
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+// Import Material UI components and icons
 import {
   Box,
   TextField,
@@ -24,7 +26,7 @@ import Cropper from "react-easy-crop";
 import getCroppedImg from "../Components/cropImageHelper";
 
 
-
+// Main Admin Settings Component
 const AdminSettings = () => {
   const [logo, setLogo] = useState(null);
   const [imageSrc, setImageSrc] = useState(null); // For cropping preview
@@ -36,8 +38,8 @@ const AdminSettings = () => {
   const [imageType, setImageType] = useState("image/png"); // Image Type
   const [uploadError, setUploadError] = useState(""); // Error state for upload
 
-  const [bgColor, setBgColor] = useState("#ffffff");
-  const [typography, setTypography] = useState("Arial");
+  const [bgColor, setBgColor] = useState("#ffffff");//Backgorund color
+  const [typography, setTypography] = useState("Arial");//Font style
   const [fontSize, setFontSize] = useState("14px"); //Default Font
   const [textColor, setTextColor] = useState("#000000");
   const [alignment, setAlignment] = useState("Left");
@@ -81,20 +83,25 @@ const handleLogoUpload = (event) => {
   }
 };
 
+
 // Finalizes cropping and sets logo
 const handleCropSave = async () => {
-  const croppedFile = await getCroppedImg(imageSrc, croppedAreaPixels, imageType);
-  setLogo(croppedFile);
-  setPreviewUrl(URL.createObjectURL(croppedFile));
+  const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels, imageType);
+
+  // Convert blob to a File with a name (required for FastAPI to handle it properly)
+  const namedFile = new File(
+    [croppedBlob],
+    `${companyId}_croplogo.png`, // Any relevant filename
+    { type: imageType }
+  );
+
+  setLogo(namedFile);  // this ensures FastAPI can access logo.filename
+  setPreviewUrl(URL.createObjectURL(namedFile));
   setCropDialogOpen(false);
 };
 
 
- //Defined new for cropping
- // const handleLogoUpload = (event) => {
- //   setLogo(event.target.files[0]);
- // };
-
+ // Save Admin Settings to Backend (FastAPI)
   const handleSaveSettings = async () => {
     const formData = new FormData();
     if (logo) formData.append("logo", logo);

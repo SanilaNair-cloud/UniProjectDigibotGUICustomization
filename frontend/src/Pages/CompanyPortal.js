@@ -1,13 +1,17 @@
+// React & state management imports
 import React, { useEffect, useState } from "react";
+// MUI components for layout and styling
 import { Typography, Box, Paper, Container } from "@mui/material";
+// React Router Outlet to render nested routes
 import { Outlet } from "react-router-dom";
+// Internal component for internal chat access
 import InternalStaffUI from "./InternalStaffUI";
 
 
-
+// CompanyPortal component simulates a secured company portal interface
 const CompanyPortal = () => {
   const [showInternalChat, setShowInternalChat] = useState(false);
- 
+   // Effect hook to handle token validation and dynamic Digibot script injection
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const token = queryParams.get("auth");
@@ -16,7 +20,7 @@ const CompanyPortal = () => {
       console.warn("No JWT token found in URL.");
       return;
     }
-
+// Authenticate the token and set user/company info in localStorage
     fetch(`http://localhost:8000/auth?auth=${token}`)
       .then((res) => res.json())
       .then((data) => {
@@ -38,7 +42,7 @@ const CompanyPortal = () => {
       if (oldLauncher) oldLauncher.remove();
     };
   }, []);
-
+  // Handle navigation and data refresh events from iframe Digibot
   useEffect(() => {
     const handleNavigation = (event) => {
       if (event.data?.type === "NAVIGATE") {
@@ -46,7 +50,7 @@ const CompanyPortal = () => {
         window.history.pushState({}, "", `/company-portal/${route}`);
         window.dispatchEvent(new PopStateEvent("popstate"));
       }
-  
+   // Handle settings update: send latest user/company info to Digibot iframe
       if (event.data?.type === "REFRESH_SETTINGS") {
         const iframe = document.getElementById("digibot-iframe");
         const payload = {

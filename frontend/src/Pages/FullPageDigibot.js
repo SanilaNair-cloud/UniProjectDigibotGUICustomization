@@ -38,7 +38,7 @@ const FullPageDigibot = () => {
     try {
       const res = await fetch(`http://localhost:8000/admin-settings/${companyId}`);
       const settings = await res.json();
-      setLogoUrl(`http://localhost:8000/uploads/${settings.logo}`);
+      setLogoUrl(`http://localhost:8000/uploads/${settings.logo}?v=${Date.now()}`); // Fetching latest image
       setTheme(settings);
       console.log("✅ Final theme object:", settings);
 
