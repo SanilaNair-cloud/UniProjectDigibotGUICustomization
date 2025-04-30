@@ -51,9 +51,9 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         method: "POST",
         body: new URLSearchParams({ email }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
         const token = data.auth;
         const decoded = JSON.parse(atob(token.split(".")[1]));
@@ -64,7 +64,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   
         setTimeout(() => {
           navigate("/digimark-dashboard");
-        }, 300); 
+        }, 300);
       } else {
         setError(data.detail || "Login failed");
       }
@@ -115,7 +115,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         <Stack spacing={2}>
           {isLoggedIn ? (
             <>
-              <Typography variant="body1" textAlign="center">
+              <Typography variant="body1" color="text.secondary">
                 You're already logged in.
               </Typography>
               <Button
@@ -123,6 +123,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 color="secondary"
                 fullWidth
                 onClick={handleLogout}
+                sx={{ borderRadius: 2, textTransform: "none" }}
               >
                 Logout
               </Button>
@@ -131,6 +132,9 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             <>
               <TextField
                 label="Email"
+                variant="outlined"
+                type="email"
+                placeholder="Enter your admin email"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -152,7 +156,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
               )}
               <Button
                 variant="contained"
-                fullWidth
+                size="large"
                 onClick={handleLogin}
                 disabled={!emailRegex.test(email)}
                 sx={{

@@ -114,7 +114,12 @@ app = FastAPI(
 
 # Enable static file access (logo uploads)
 
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOADS_DIR = os.path.join(BASE_DIR, "uploads")
+
+
+
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 # This is a temporary solution. In production, specify the allowed origins.
 # For example, replace ["*"] with ["https://your-frontend-domain.com"]
@@ -270,10 +275,17 @@ def authenticate_user(auth: str = Query(...)):
 # Redirects to the chatbot UI with a generated token (for testing/demo)
 @app.get("/" , tags=["Digibot – Redirect"])
 def root_redirect():
+<<<<<<< HEAD
     user_id = "usertwbm123@example.com"
     user_type = "admin"
     company_id = "twmba123"
     company_name = "Toowoomba"
+=======
+    user_id = "amrit12@example.com"
+    user_type = "admin"
+    company_id = "amr123"
+    company_name = "AMT123"
+>>>>>>> dev-amrit
     token = create_jwt_token(user_id, user_type, company_id, company_name)
     return RedirectResponse(url=f"http://localhost:3000/company-portal?auth={token}")
 

@@ -1,19 +1,33 @@
+/**
+ * InternalStaffUI – Staff Chat Interface with DigiBot
+ *
+ * This component provides a chat interface for internal staff to interact with DigiBot.
+ * Users can type a message, send it, and view the bot's response.
+ *
+ * Features:
+ * - Stores company ID from localStorage
+ * - Sends message to backend API on submit
+ * - Displays response from DigiBot
+ */
+
 import React, { useState, useEffect } from "react";
 import { Box, TextField, Button, Typography, Paper } from "@mui/material";
 
 const InternalStaffUI = () => {
+  // State to hold the input message, chatbot response, and company ID
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState("");
   const [companyId, setCompanyId] = useState("");
 
-
+  // Load company ID from localStorage on component mount
   useEffect(() => {
     const id = localStorage.getItem("companyId");
-    setCompanyId(id || "default123");
+    setCompanyId(id || "default123"); // fallback if no ID found
   }, []);
 
+  // Handle sending the message to the backend chatbot API
   const handleSubmit = async () => {
-    if (!message.trim()) return;
+    if (!message.trim()) return; // avoid sending empty messages
 
     setResponse("✍️ DigiBot is thinking...");
 
@@ -31,7 +45,7 @@ const InternalStaffUI = () => {
       setResponse("⚠️ Failed to get response.");
     }
 
-    setMessage(""); 
+    setMessage("");
   };
 
   return (
@@ -44,10 +58,12 @@ const InternalStaffUI = () => {
         px: 2,
       }}
     >
+      {/* Page Title */}
       <Typography variant="h5" gutterBottom align="center">
         Internal Staff Chat
       </Typography>
 
+      {/* Chat input area */}
       <Paper
         elevation={3}
         sx={{
@@ -72,6 +88,7 @@ const InternalStaffUI = () => {
         </Button>
       </Paper>
 
+      {/* Chatbot response area */}
       {response && (
         <Typography
           variant="body1"
