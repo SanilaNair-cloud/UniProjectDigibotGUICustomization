@@ -277,9 +277,9 @@ def authenticate_user(auth: str = Query(...)):
 # Redirects to the digibot UI with a generated token (for testing/demo)
 @app.get("/" , tags=["Digibot – Redirect"])
 def root_redirect():
-    user_id = "testing123@example.com"
+    user_id = "test111@example.com"
     user_type = "admin"
-    company_id = "test123"
+    company_id = "test111"
     company_name = "Test Company"
     token = create_jwt_token(user_id, user_type, company_id, company_name)
     return RedirectResponse(url=f"http://localhost:3000/company-portal?auth={token}")
