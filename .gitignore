@@ -11,9 +11,10 @@ backend/venv/
 # Python cache and compiled files
 __pycache__/
 *.py[cod]
+*.pyc
 
 # Uploaded files
 backend/uploads/
 
-# Log files (optional)
+# Log files
 *.log
