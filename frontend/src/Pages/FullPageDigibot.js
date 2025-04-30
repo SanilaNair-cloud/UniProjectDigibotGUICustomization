@@ -50,7 +50,9 @@ const FullPageDigibot = () => {
     try {
       const res = await fetch(`http://localhost:8000/admin-settings/${companyId}`);
       const settings = await res.json();
-      setLogoUrl(`http://localhost:8000/uploads/${settings.logo}?v=${Date.now()}`); // Fetching latest image
+      const logo = settings.logo;
+      setLogoUrl(logo ? `http://localhost:8000/uploads/${logo}?v=${Date.now()}` : "");
+
       setTheme(settings);
       setVersion((prev) => prev + 1); // Trigger re-render to apply theme
 
@@ -202,7 +204,11 @@ const FullPageDigibot = () => {
             transition: "background-color 0.3s ease",
           }}>
           <Stack direction="row" spacing={2} alignItems="center">
-            <Avatar src={logoUrl || "/Images/speech-bubble.png"} sx={{ width: 40, height: 40, borderRadius: 2 }} />
+            {/*<Avatar src={logoUrl || "/Images/speech-bubble.png"} sx={{ width: 40, height: 40, borderRadius: 2 }} />*/}
+            <Avatar
+              src={logoUrl && !logoUrl.includes("undefined") ? logoUrl : "/Images/speech-bubble.png"}
+              sx={{ width: 40, height: 40, borderRadius: 2 }}
+            />
             <Box>
               <Typography variant="h6" fontSize={18} m={0}>DigiBot</Typography>
               <Typography variant="caption" color="text.secondary">{companyName}</Typography>
