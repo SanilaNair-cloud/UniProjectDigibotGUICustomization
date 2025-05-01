@@ -277,7 +277,7 @@ def authenticate_user(auth: str = Query(...)):
 # Redirects to the digibot UI with a generated token (for testing/demo)
 @app.get("/" , tags=["Digibot – Redirect"])
 def root_redirect():
-    user_id = "test111@example.com"
+    user_id = "usertwbm123@example.com"
     user_type = "admin"
     company_id = "test111"
     company_name = "Test Company"
