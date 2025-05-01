@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import LogoutIcon from "@mui/icons-material/Logout"; 
 
 
+
 // Register Chart.js modules
 ChartJS.register(
 BarElement, CategoryScale, LinearScale, ArcElement, PointElement,
@@ -41,6 +42,8 @@ const parseWithTimezoneFallback = (datetimeStr) => {
 const fromDate = dateRange.from ? parseWithTimezoneFallback(dateRange.from + "T00:00:00") : null;
 const toDate = dateRange.to ? parseWithTimezoneFallback(dateRange.to + "T23:59:59") : null;
 const [viewMode, setViewMode] = useState("avg");
+const [dateError, setDateError] = useState("");
+
 
 
 
@@ -278,6 +281,7 @@ useEffect(() => {
           max: new Date().toISOString().split("T")[0], // today
         }}
       />
+<<<<<<< HEAD
  
     </Grid>
  
@@ -298,6 +302,28 @@ useEffect(() => {
  
     </Grid>
     
+=======
+
+    </Grid>
+
+    <Grid item xs={6} sm={2}>
+      <TextField
+        fullWidth
+        label="To"
+        type="date"
+        InputLabelProps={{ shrink: true }}
+        value={dateRange.to}
+        onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+        inputProps={{
+          min: dateRange.from || undefined, // disable dates before 'From'
+          max: new Date().toISOString().split("T")[0], // today
+        }}
+        disabled={!dateRange.from} // prevent selecting 'To' until 'From' is chosen
+      />
+
+    </Grid>
+
+>>>>>>> f91fd8b57ce290abb48655ba451976fefafcb918
   </Grid>
 
   <FormControlLabel
