@@ -1,5 +1,5 @@
 // Import core React & routing hooks
-import React, { useState } from "react";
+import React, { useState,useEffect  } from "react";
 import { useNavigate } from "react-router-dom";
 // Import Material UI components and icons
 import {
@@ -44,16 +44,47 @@ const AdminSettings = () => {
   const [textColor, setTextColor] = useState("#000000");
   const [alignment, setAlignment] = useState("Left");
 
-  const [fontWeight, setFontWeight] = useState("400"); // default normal
-
+  
   const [customAudience, setCustomAudience] = useState("");
   const [tone, setTone] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   const companyId = localStorage.getItem("companyId") || "";
   const companyName = localStorage.getItem("companyName") || "";
   const adminId = localStorage.getItem("userId") || "";
+
+
+  const navigate = useNavigate();
+
+  // Load existing settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await axios.get(`http://localhost:8000/admin-settings/${companyId}`);
+        const data = res.data;
+
+        setBgColor(data.background_color);
+        setTypography(data.font_style);
+        setFontSize(data.font_size);
+        setTextColor(data.text_color);
+        setAlignment(data.alignment);
+        setCustomAudience(data.custom_audience);
+        setTone(data.tone);
+        
+        if (data.logo) {
+          const timestamp = new Date().getTime(); // Used to bust cache
+          const logoUrl = `http://localhost:8000/uploads/${data.logo}?t=${timestamp}`;
+          setPreviewUrl(logoUrl);
+
+        }
+      } catch (error) {
+        console.error("Error fetching admin settings:", error);
+      }
+    };
+
+    fetchSettings();
+  }, [companyId]);
 
 //  Called when crop is done
 const onCropComplete = (_, croppedPixels) => {
@@ -115,8 +146,7 @@ const handleCropSave = async () => {
     formData.append("admin_id", adminId);
     formData.append("company_name", companyName);
     formData.append("company_id", companyId);
-    formData.append("font_weight", fontWeight); //Font weight
-
+    
     try {
       await axios.post("http://localhost:8000/admin-settings/", formData, {
         headers: {
@@ -279,34 +309,6 @@ const handleCropSave = async () => {
               </MenuItem>
             ))}
           </TextField>
-
-          {/*Font Weight*/}
-         <TextField
-          fullWidth
-          select
-          label="Font Weight"
-          variant="outlined"
-          margin="normal"
-          value={fontWeight}
-          onChange={(e) => setFontWeight(e.target.value)}
-        >
-          {[
-            { label: "Thin", value: "100" },
-            { label: "Extra Light", value: "200" },
-            { label: "Light", value: "300" },
-            { label: "Normal", value: "400" },
-            { label: "Medium", value: "500" },
-            { label: "Semi Bold", value: "600" },
-            { label: "Bold", value: "700" },
-            { label: "Extra Bold", value: "800" },
-            { label: "Black", value: "900" },
-          ].map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </TextField>
-
 
           <TextField
             fullWidth
