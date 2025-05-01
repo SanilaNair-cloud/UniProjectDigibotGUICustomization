@@ -30,6 +30,16 @@ const [feedbackData, setFeedbackData] = useState([]);
 const [selectedCompany, setSelectedCompany] = useState("all");
 const [searchTerm, setSearchTerm] = useState("");
 const [dateRange, setDateRange] = useState({ from: "", to: "" }); 
+const parseWithTimezoneFallback = (datetimeStr) => {
+  // Check if string already includes timezone info
+  if (datetimeStr.includes('+') || datetimeStr.includes('Z')) {
+    return new Date(datetimeStr);
+  }
+  // If no timezone, assume +10 offset
+  return new Date(datetimeStr + "+10:00");
+};
+const fromDate = dateRange.from ? parseWithTimezoneFallback(dateRange.from + "T00:00:00") : null;
+const toDate = dateRange.to ? parseWithTimezoneFallback(dateRange.to + "T23:59:59") : null;
 const [viewMode, setViewMode] = useState("avg");
 
 
@@ -77,16 +87,18 @@ useEffect(() => {
 }, []);
 
 
-
  // Filter feedback based on company, comment, and date range
   const filteredFeedback = feedbackData.filter(fb => {
   const companyMatch =
     selectedCompany === "all" ||
     fb.company_id?.toLowerCase().trim() === selectedCompany.toLowerCase().trim();
+
   
   const commentMatch = fb.text?.toLowerCase().includes(searchTerm.toLowerCase());
-  const dateMatch = (!dateRange.from || new Date(fb.created_at) >= new Date(dateRange.from)) &&
-  (!dateRange.to || new Date(fb.created_at) <= new Date(dateRange.to));
+  const dateMatch =
+  (!fromDate || parseWithTimezoneFallback(fb.created_at) >= fromDate) &&
+  (!toDate || parseWithTimezoneFallback(fb.created_at) <= toDate);
+ 
   return companyMatch && commentMatch && dateMatch;
   });
   
@@ -100,7 +112,7 @@ useEffect(() => {
   if (fb.sentiment) sentimentCounts[fb.sentiment]++;
   companyRatings[fb.company_id] = (companyRatings[fb.company_id] || 0) + fb.rating;
   if (fb.created_at && fb.sentiment_score != null) {
-  timeSeries.push({ x: new Date(fb.created_at), y: fb.sentiment_score });
+    timeSeries.push({ x: parseWithTimezoneFallback(fb.created_at), y: fb.sentiment_score });
   }
   ratingCounts[fb.rating]++;
   totalRating += fb.rating;
@@ -222,7 +234,7 @@ useEffect(() => {
 
       </Box>
 
-      <Grid container spacing={2} mb={2}>
+  <Grid container spacing={2} mb={2}>
     <Grid item xs={12} sm={4}>
       <FormControl fullWidth>
       <InputLabel>Select Company</InputLabel>
@@ -254,30 +266,38 @@ useEffect(() => {
         type="date"
         InputLabelProps={{ shrink: true }}
         value={dateRange.from}
-        onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-        inputProps={{ max: new Date().toISOString().split("T")[0] }}
+        onChange={(e) => {
+          const newFrom = e.target.value;
+          setDateRange((prev) => ({
+            ...prev,
+            from: newFrom,
+            to: prev.to && prev.to < newFrom ? "" : prev.to, // clear 'to' if now invalid
+          }));
+        }}
+        inputProps={{
+          max: new Date().toISOString().split("T")[0], // today
+        }}
       />
-      
+ 
     </Grid>
+ 
     <Grid item xs={6} sm={2}>
-    <TextField
-      fullWidth
-      label="To"
-      type="date"
-      InputLabelProps={{ shrink: true }}
-      value={dateRange.to}
-      onChange={(e) => {
-        const selectedTo = e.target.value;
-        if (selectedTo < dateRange.from) {
-          alert("❌ 'To' date cannot be earlier than 'From' date.");
-          return;
-        }
-        setDateRange({ ...dateRange, to: selectedTo });
-      }}
-      inputProps={{ max: new Date().toISOString().split("T")[0] }}
-    />
-
+      <TextField
+        fullWidth
+        label="To"
+        type="date"
+        InputLabelProps={{ shrink: true }}
+        value={dateRange.to}
+        onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+        inputProps={{
+          min: dateRange.from || undefined, // disable dates before 'From'
+          max: new Date().toISOString().split("T")[0], // today
+        }}
+        disabled={!dateRange.from} // prevent selecting 'To' until 'From' is chosen
+      />
+ 
     </Grid>
+    
   </Grid>
 
   <FormControlLabel
