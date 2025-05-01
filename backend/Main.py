@@ -292,24 +292,25 @@ def get_admin_settings(company_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Settings not found")
     return settings
 
-# ----------------------------
+#----------------------------
 # Webhook n8n workflow Relay and DigiBot Integration
 # ----------------------------
 @app.post("/chat" ,tags=["Digibot"])
 async def relay_to_webhook(request: Request, db: Session = Depends(get_db)):
     body = await request.json()
-
+ 
     company_id = body.get("company_id")
     if not company_id:
         raise HTTPException(status_code=400, detail="Missing company_id")
-
-    
+ 
     settings = db.query(AdminSettings).filter(AdminSettings.company_id == company_id).first()
-    audience = settings.custom_audience if settings else "N/A"
-    tone = settings.tone if settings else "N/A"
+ 
+    # Safely extract tone and audience even if settings is None
+    audience = settings.custom_audience if settings and settings.custom_audience else "N/A"
+    tone = settings.tone if settings and settings.tone else "N/A"
     body["tone"] = tone
     body["custom_audience"] = audience
-
+ 
     """
     async with httpx.AsyncClient() as client:
         
@@ -321,15 +322,16 @@ async def relay_to_webhook(request: Request, db: Session = Depends(get_db)):
 
     return response.json()
     """
-   # Mock reply while webhook POST is not functional
+ 
+    # Mock reply while webhook POST is not functional
     mock_reply = f"""⚠️ This is a test response. The production webhook is not yet active.
-
-    🎯 Audience: {settings.custom_audience or "N/A"}  
-    🗣️ Tone: {settings.tone or "N/A"}
-
-    Once the real webhook is ready, this will return intelligent AI generated responses.
-    """
-    return { "reply": mock_reply }
+ 
+🎯 Audience: {audience}  
+🗣️ Tone: {tone}
+ 
+Once the real webhook is ready, this will return intelligent AI generated responses.
+"""
+    return {"reply": mock_reply}
 
 # ----------------------------
 # Feedback Handling
