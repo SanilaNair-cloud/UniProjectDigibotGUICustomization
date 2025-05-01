@@ -281,28 +281,6 @@ useEffect(() => {
           max: new Date().toISOString().split("T")[0], // today
         }}
       />
-<<<<<<< HEAD
- 
-    </Grid>
- 
-    <Grid item xs={6} sm={2}>
-      <TextField
-        fullWidth
-        label="To"
-        type="date"
-        InputLabelProps={{ shrink: true }}
-        value={dateRange.to}
-        onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-        inputProps={{
-          min: dateRange.from || undefined, // disable dates before 'From'
-          max: new Date().toISOString().split("T")[0], // today
-        }}
-        disabled={!dateRange.from} // prevent selecting 'To' until 'From' is chosen
-      />
- 
-    </Grid>
-    
-=======
 
     </Grid>
 
@@ -323,7 +301,6 @@ useEffect(() => {
 
     </Grid>
 
->>>>>>> f91fd8b57ce290abb48655ba451976fefafcb918
   </Grid>
 
   <FormControlLabel
