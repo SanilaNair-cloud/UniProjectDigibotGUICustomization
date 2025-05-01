@@ -108,6 +108,7 @@ Prerequisite
 
 For Windows(setup.bat)
 ----------------------
+Double click to run setup.bat
 This will do the below
 - Navigates to the backend folder and creates a Python virtual environment (venv) if it does not exist.
 - Activates the virtual environment and installs all required backend dependencies from requirements.txt.
@@ -121,6 +122,7 @@ Displays a message that all services are launched.
 
 For Mac(setup.sh)
 ----------------------
+command bash setup.sh
 - Navigates to the backend folder and creates a Python virtual environment (venv) if it does not exist.
 - Activates the virtual environment and installs backend dependencies from requirements.txt.
 - Kills any process running on port 8000 and starts the FastAPI backend using Uvicorn in the background.
