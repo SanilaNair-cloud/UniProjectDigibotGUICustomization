@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import LogoutIcon from "@mui/icons-material/Logout"; 
 
 
+
 // Register Chart.js modules
 ChartJS.register(
 BarElement, CategoryScale, LinearScale, ArcElement, PointElement,
@@ -31,6 +32,8 @@ const [selectedCompany, setSelectedCompany] = useState("all");
 const [searchTerm, setSearchTerm] = useState("");
 const [dateRange, setDateRange] = useState({ from: "", to: "" }); 
 const [viewMode, setViewMode] = useState("avg");
+const [dateError, setDateError] = useState("");
+
 
 
 
@@ -254,30 +257,38 @@ useEffect(() => {
         type="date"
         InputLabelProps={{ shrink: true }}
         value={dateRange.from}
-        onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
-        inputProps={{ max: new Date().toISOString().split("T")[0] }}
+        onChange={(e) => {
+          const newFrom = e.target.value;
+          setDateRange((prev) => ({
+            ...prev,
+            from: newFrom,
+            to: prev.to && prev.to < newFrom ? "" : prev.to, // clear 'to' if now invalid
+          }));
+        }}
+        inputProps={{
+          max: new Date().toISOString().split("T")[0], // today
+        }}
       />
-      
-    </Grid>
-    <Grid item xs={6} sm={2}>
-    <TextField
-      fullWidth
-      label="To"
-      type="date"
-      InputLabelProps={{ shrink: true }}
-      value={dateRange.to}
-      onChange={(e) => {
-        const selectedTo = e.target.value;
-        if (selectedTo < dateRange.from) {
-          alert("❌ 'To' date cannot be earlier than 'From' date.");
-          return;
-        }
-        setDateRange({ ...dateRange, to: selectedTo });
-      }}
-      inputProps={{ max: new Date().toISOString().split("T")[0] }}
-    />
 
     </Grid>
+
+    <Grid item xs={6} sm={2}>
+      <TextField
+        fullWidth
+        label="To"
+        type="date"
+        InputLabelProps={{ shrink: true }}
+        value={dateRange.to}
+        onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
+        inputProps={{
+          min: dateRange.from || undefined, // disable dates before 'From'
+          max: new Date().toISOString().split("T")[0], // today
+        }}
+        disabled={!dateRange.from} // prevent selecting 'To' until 'From' is chosen
+      />
+
+    </Grid>
+
   </Grid>
 
   <FormControlLabel
