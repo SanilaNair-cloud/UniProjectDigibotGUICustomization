@@ -249,21 +249,34 @@ useEffect(() => {
     </Grid>
     <Grid item xs={6} sm={2}>
       <TextField
-        fullWidth label="From"
+        fullWidth
+        label="From"
         type="date"
         InputLabelProps={{ shrink: true }}
         value={dateRange.from}
         onChange={(e) => setDateRange({ ...dateRange, from: e.target.value })}
+        inputProps={{ max: new Date().toISOString().split("T")[0] }}
       />
+      
     </Grid>
     <Grid item xs={6} sm={2}>
-      <TextField
-        fullWidth label="To"
-        type="date"
-        InputLabelProps={{ shrink: true }}
-        value={dateRange.to}
-        onChange={(e) => setDateRange({ ...dateRange, to: e.target.value })}
-      />
+    <TextField
+      fullWidth
+      label="To"
+      type="date"
+      InputLabelProps={{ shrink: true }}
+      value={dateRange.to}
+      onChange={(e) => {
+        const selectedTo = e.target.value;
+        if (selectedTo < dateRange.from) {
+          alert("❌ 'To' date cannot be earlier than 'From' date.");
+          return;
+        }
+        setDateRange({ ...dateRange, to: selectedTo });
+      }}
+      inputProps={{ max: new Date().toISOString().split("T")[0] }}
+    />
+
     </Grid>
   </Grid>
 

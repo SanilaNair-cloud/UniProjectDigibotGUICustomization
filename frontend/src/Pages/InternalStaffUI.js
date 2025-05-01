@@ -79,10 +79,17 @@ const InternalStaffUI = () => {
           placeholder="Type your message..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleSubmit()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault(); // Prevent newline
+              handleSubmit();     // Trigger your send function
+            }
+          }}
+          multiline
           variant="standard"
           InputProps={{ disableUnderline: true }}
         />
+
         <Button variant="text" onClick={handleSubmit}>
           ➤
         </Button>
