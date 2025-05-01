@@ -56,25 +56,25 @@ const FullPageDigibot = () => {
     try {
       const res = await fetch(`http://localhost:8000/admin-settings/${companyId}`);
       const settings = await res.json();
-  
+
       const logo = settings.logo;
       setLogoUrl(logo ? `http://localhost:8000/uploads/${logo}?v=${Date.now()}` : "");
-  
+
       setTheme(settings);
       setVersion((prev) => prev + 1);
-  
+
       setFontStyle(settings.font_style || "Arial");
       setFontSize(settings.font_size || "14px");
       setTextColor(settings.text_color || "#000000");
-      setTextAlignment(settings.text_alignment || "left");
-  
+      setTextAlignment(settings.alignment || "left");
+
       const name = userId.split("@")[0];
       setGreeting(`Hi ${name}, how can I help?`);
     } catch (err) {
       console.error("Error loading admin settings:", err);
     }
   };
-  
+
 
   // Receive user info and refresh messages from parent window
   useEffect(() => {
@@ -212,66 +212,61 @@ const FullPageDigibot = () => {
       >
         {/* Chatbot Header with Logo, Company Name, and Actions */}
         <Stack
-            direction="column"
-            spacing={0}
-            sx={{
-              backgroundColor: theme.background_color || "#ffffff",
-              transition: "background-color 0.3s ease",
-              px: 2,
-              pt: 2,
-            }}
-          >
-  {/* Top Row: Logo, DigiBot Title, Icons */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Stack direction="row" spacing={2} alignItems="center">
-                <Avatar
-                  src={logoUrl && !logoUrl.includes("undefined") ? logoUrl : "/Images/speech-bubble.png"}
-                  sx={{ width: 40, height: 40, borderRadius: 2 }}
-                />
-                <Typography variant="h6" fontSize={18} m={0}>DigiBot</Typography>
-              </Stack>
-              <Box>
-                {userRole === "admin" && (
-                  <IconButton size="small" onClick={handleGoToAdmin}><Settings /></IconButton>
-                )}
-                <IconButton size="small" onClick={handleClose}><Close /></IconButton>
-              </Box>
+          direction="column"
+          spacing={0}
+          sx={{
+            backgroundColor: theme.background_color || "#ffffff",
+            transition: "background-color 0.3s ease",
+            px: 2,
+            pt: 2,
+          }}
+        >
+          {/* Top Row: Logo, DigiBot Title, Icons */}
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Avatar
+                src={logoUrl && !logoUrl.includes("undefined") ? logoUrl : "/Images/speech-bubble.png"}
+                sx={{ width: 40, height: 40, borderRadius: 2 }}
+              />
+              <Typography variant="h6" fontSize={18} m={0}>DigiBot</Typography>
             </Stack>
-
-            {/* Company Name - NEW Position */}
-           
-            <Box
-  sx={{
-    width: "100%",
-    mt: 0.5,
-    display: "flex",
-    justifyContent:
-      textAlignment?.toLowerCase() === "center"
-        ? "center"
-        : textAlignment?.toLowerCase() === "right"
-        ? "flex-end"
-        : "flex-start",
-  }}
->
-  <Typography
-    sx={{
-      fontSize: fontSize || "14px",
-      fontFamily: fontStyle || "Arial",
-      color: textColor || "#333",
-      fontWeight: 500,
-      lineHeight: 1.2,
-    }}
-  >
-    {companyName}
-  </Typography>
-</Box>
-
+            <Box>
+              {userRole === "admin" && (
+                <IconButton size="small" onClick={handleGoToAdmin}><Settings /></IconButton>
+              )}
+              <IconButton size="small" onClick={handleClose}><Close /></IconButton>
+            </Box>
           </Stack>
 
+          {/* Company Name - NEW Position */}
 
+          <Box
+            sx={{
+              width: "100%",
+              mt: 0.5,
+              display: "flex",
+              justifyContent:
+                textAlignment?.toLowerCase() === "center"
+                  ? "center"
+                  : textAlignment?.toLowerCase() === "right"
+                    ? "flex-end"
+                    : "flex-start",
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: fontSize || "14px",
+                fontFamily: fontStyle || "Arial",
+                color: textColor || "#333",
+                fontWeight: 500,
+                lineHeight: 1.2,
+              }}
+            >
+              {companyName}
+            </Typography>
+          </Box>
 
-          
-        
+        </Stack>
 
         {/* Chat Message Area */}
         <Box flexGrow={1} overflow="auto" mb={2} p={1} bgcolor="#f9f9f9" borderRadius={2}>

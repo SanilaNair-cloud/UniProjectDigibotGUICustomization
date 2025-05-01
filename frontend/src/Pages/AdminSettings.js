@@ -1,5 +1,5 @@
 // Import core React & routing hooks
-import React, { useState,useEffect  } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Close } from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
@@ -47,7 +47,7 @@ const AdminSettings = () => {
   const [textColor, setTextColor] = useState("#000000");
   const [alignment, setAlignment] = useState("Left");
 
-  
+
   const [customAudience, setCustomAudience] = useState("");
   const [tone, setTone] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -74,7 +74,7 @@ const AdminSettings = () => {
         setAlignment(data.alignment);
         setCustomAudience(data.custom_audience);
         setTone(data.tone);
-        
+
         if (data.logo) {
           const timestamp = new Date().getTime(); // Used to bust cache
           const logoUrl = `http://localhost:8000/uploads/${data.logo}?t=${timestamp}`;
@@ -89,53 +89,53 @@ const AdminSettings = () => {
     fetchSettings();
   }, [companyId]);
 
-//  Called when crop is done
-const onCropComplete = (_, croppedPixels) => {
-  setCroppedAreaPixels(croppedPixels);
-};
+  //  Called when crop is done
+  const onCropComplete = (_, croppedPixels) => {
+    setCroppedAreaPixels(croppedPixels);
+  };
 
-//  Converts image to base64 and opens cropper dialog
-const handleLogoUpload = (event) => {
-  const file = event.target.files[0];
-  if (file) {
+  //  Converts image to base64 and opens cropper dialog
+  const handleLogoUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
       // Validation for PNG or JPEG
-    if (file.type !== "image/png" && file.type !== "image/jpeg") {
-      setUploadError("Only PNG or JPEG files are allowed.");
-      return;
+      if (file.type !== "image/png" && file.type !== "image/jpeg") {
+        setUploadError("Only PNG or JPEG files are allowed.");
+        return;
+      }
+
+
+      //(image/png or image/jpeg)
+      setImageType(file.type);
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageSrc(reader.result);
+        setCropDialogOpen(true);
+      };
+      reader.readAsDataURL(file);
     }
-    
-  
-    //(image/png or image/jpeg)
-    setImageType(file.type);
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      setImageSrc(reader.result);
-      setCropDialogOpen(true);
-    };
-    reader.readAsDataURL(file);
-  }
-};
+  };
 
 
-// Finalizes cropping and sets logo
-const handleCropSave = async () => {
-  const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels, imageType);
+  // Finalizes cropping and sets logo
+  const handleCropSave = async () => {
+    const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels, imageType);
 
-  // Convert blob to a File with a name (required for FastAPI to handle it properly)
-  const namedFile = new File(
-    [croppedBlob],
-    `${companyId}_croplogo.png`, // Any relevant filename
-    { type: imageType }
-  );
+    // Convert blob to a File with a name (required for FastAPI to handle it properly)
+    const namedFile = new File(
+      [croppedBlob],
+      `${companyId}_croplogo.png`, // Any relevant filename
+      { type: imageType }
+    );
 
-  setLogo(namedFile);  // this ensures FastAPI can access logo.filename
-  setPreviewUrl(URL.createObjectURL(namedFile));
-  setCropDialogOpen(false);
-};
+    setLogo(namedFile);  // this ensures FastAPI can access logo.filename
+    setPreviewUrl(URL.createObjectURL(namedFile));
+    setCropDialogOpen(false);
+  };
 
 
- // Save Admin Settings to Backend (FastAPI)
+  // Save Admin Settings to Backend (FastAPI)
   const handleSaveSettings = async () => {
     const formData = new FormData();
     if (logo) formData.append("logo", logo);
@@ -149,7 +149,7 @@ const handleCropSave = async () => {
     formData.append("admin_id", adminId);
     formData.append("company_name", companyName);
     formData.append("company_id", companyId);
-    
+
     try {
       await axios.post("http://localhost:8000/admin-settings/", formData, {
         headers: {
@@ -157,7 +157,7 @@ const handleCropSave = async () => {
         },
       });
       setOpenSnackbar(true);
-      
+
       setTimeout(() => {
         window.parent.postMessage({ type: "REFRESH_SETTINGS" }, "*");
         navigate("/company-portal");
@@ -177,7 +177,7 @@ const handleCropSave = async () => {
         justifyContent: "center",
         alignItems: "flex-start",
         px: 2,
-        py:6,
+        py: 6,
       }}
     >
 
@@ -194,7 +194,7 @@ const handleCropSave = async () => {
           position: "relative"
         }}
       >
-      <Stack
+        <Stack
           direction="row"
           alignItems="center"
           justifyContent="space-between"
@@ -231,22 +231,22 @@ const handleCropSave = async () => {
               onChange={handleLogoUpload}
               accept="image/*"
             />
-         {/* Logo Cropping */}
-          {previewUrl && (
-            <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
-              <img
-                src={previewUrl}
-                alt="Logo Preview"
-                style={{
-                  width: 100,
-                  height: 100,
-                  borderRadius: 8,
-                  border: "1px solid #ccc",
-                }}
-              />
-            </Box>
-          )}
-          {/* end of --------------Logo Cropping */}
+            {/* Logo Cropping */}
+            {previewUrl && (
+              <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
+                <img
+                  src={previewUrl}
+                  alt="Logo Preview"
+                  style={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: 8,
+                    border: "1px solid #ccc",
+                  }}
+                />
+              </Box>
+            )}
+            {/* end of --------------Logo Cropping */}
             <Button
               variant="contained"
               color="primary"
@@ -263,16 +263,16 @@ const handleCropSave = async () => {
             </Typography>
           )}
         </Box>
-         {/*Logo Crop Dialog */}
+        {/*Logo Crop Dialog */}
         <Dialog open={cropDialogOpen} onClose={() => setCropDialogOpen(false)} fullWidth maxWidth="sm">
           <DialogContent sx={{ height: 400, position: "relative" }}>
             {imageSrc && (
               <Cropper
                 image={imageSrc}
-                crop={crop} 
-                onCropChange={setCrop} 
+                crop={crop}
+                onCropChange={setCrop}
                 zoom={zoom}
-                onZoomChange={setZoom} 
+                onZoomChange={setZoom}
                 aspect={1}
                 onCropComplete={onCropComplete}
               />
@@ -285,7 +285,7 @@ const handleCropSave = async () => {
             </Button>
           </DialogActions>
         </Dialog>
-      
+
         <Box sx={{ bgcolor: "#fff3e0", p: 2.5, borderRadius: 2, mb: 2 }}>
           <Typography variant="h6">Select Background Color</Typography>
           <input
@@ -296,7 +296,7 @@ const handleCropSave = async () => {
           />
         </Box>
 
-      
+
         <Box sx={{ bgcolor: "#f7f7f7", p: 2, borderRadius: 2, mt: 2 }}>
           <Typography variant="h6" gutterBottom>
             Typography Settings
@@ -355,7 +355,7 @@ const handleCropSave = async () => {
             value={alignment}
             onChange={(e) => setAlignment(e.target.value)}
           >
-            {["Left", "Center", "Right", "Justify"].map((align) => (
+            {["Left", "Center", "Right"].map((align) => (
               <MenuItem key={align} value={align}>
                 {align}
               </MenuItem>
@@ -426,12 +426,12 @@ const handleCropSave = async () => {
         </Alert>
       </Snackbar>
       {/*  Upload Error Snackbar */}
-        <Snackbar
+      <Snackbar
         open={!!uploadError}
         autoHideDuration={4000}
         onClose={() => setUploadError("")}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
+      >
         <Alert onClose={() => setUploadError("")} severity="error" sx={{ width: "100%" }}>
           {uploadError}
         </Alert>
