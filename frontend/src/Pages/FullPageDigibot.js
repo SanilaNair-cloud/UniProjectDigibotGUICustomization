@@ -255,6 +255,16 @@ const FullPageDigibot = () => {
           <TextField
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault(); // Prevent newline
+                handleSend();
+              }
+              // ❌ Do not block Shift+Enter — let it naturally insert a newline
+            }}
+            multiline
+            minRows={1}
+            maxRows={4} // Optional: limit height
             placeholder="Type your message..."
             fullWidth
             size="small"
