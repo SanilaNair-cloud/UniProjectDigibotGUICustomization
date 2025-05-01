@@ -4,7 +4,7 @@
 
 A full stack DigiBot interface embedded into a company portal, which supports the below:
 
-- Company-specific **admin customization** (branch logo, typography, custom audience, tone of voice)
+- Company-specific **admin customization** (Company Brand logo, typography, custom audience, tone of voice)
 - Secure **SSO-based authentication** using RSA JWT
 - Public-facing DigiBot and internal **staff-facing UI**
 - DigiMark Super Admin only **feedback collection** and sentiment dashboard
