@@ -1,6 +1,8 @@
 // Import core React & routing hooks
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Close } from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton";
 // Import Material UI components and icons
 import {
   Box,
@@ -17,6 +19,7 @@ import {
   DialogContent,
   DialogActions,
   //Logo Cropping
+  Stack,
 } from "@mui/material";
 import { Settings, CloudUpload } from "@mui/icons-material";
 import axios from "axios";
@@ -158,11 +161,34 @@ const handleCropSave = async () => {
           borderRadius: 4,
           textAlign: "center",
           boxShadow: 3,
+          position: "relative"
         }}
       >
-        <Typography variant="h5" gutterBottom>
-          Admin Settings <Settings fontSize="small" />
-        </Typography>
+      <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ mb: 2 }}
+        >
+          <Typography variant="h6" fontWeight={600} sx={{ mx: "auto" }}>
+            Admin Settings <Settings fontSize="small" />
+          </Typography>
+          <IconButton
+            aria-label="close"
+            onClick={() => navigate("/company-portal")}
+            size="small"
+            sx={{
+              position: "absolute",
+              right: 16,
+              top: 16,
+              color: "text.secondary",
+            }}
+          >
+            <Close />
+          </IconButton>
+        </Stack>
+
+
 
         {/* Logo Upload */}
         <Box sx={{ bgcolor: "#eef5ff", p: 2.5, borderRadius: 2, mb: 2 }}>
