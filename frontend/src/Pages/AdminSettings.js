@@ -125,7 +125,7 @@ const AdminSettings = () => {
     // Convert blob to a File with a name (required for FastAPI to handle it properly)
     const namedFile = new File(
       [croppedBlob],
-      `${companyId}_croplogo.png`, // Any relevant filename
+      `croplogo.png`, // Any relevant filename
       { type: imageType }
     );
 
