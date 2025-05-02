@@ -273,7 +273,7 @@ def authenticate_user(auth: str = Query(...)):
 @app.get("/" , tags=["Digibot – Redirect"])
 def root_redirect():
     user_id = "test111@example.com"
-    user_type = "admin"
+    user_type = "user"
     company_id = "test111"
     company_name = "Test Company Site"
     token = create_jwt_token(user_id, user_type, company_id, company_name)

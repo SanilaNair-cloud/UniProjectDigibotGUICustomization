@@ -1,6 +1,6 @@
 
 
-#  README FILE of DigiBotGUICustomization
+#  README FILE of RAG Automation UI
 
 A full stack DigiBot interface embedded into a company portal, which supports the below:
 
