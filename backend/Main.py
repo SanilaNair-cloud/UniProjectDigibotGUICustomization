@@ -115,7 +115,10 @@ app = FastAPI(
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOADS_DIR = os.path.join(BASE_DIR, "uploads")
 
+# Ensure uploads directory exists
+os.makedirs(UPLOADS_DIR, exist_ok=True)
 
+# Mount static files
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 # This is a temporary solution. In production, specify the allowed origins.
