@@ -18,3 +18,4 @@ backend/uploads/
 
 # Log files
 *.log
+node_modules/
